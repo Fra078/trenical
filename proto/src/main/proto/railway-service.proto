@@ -1,0 +1,64 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option java_multiple_files = true;
+
+package it.trenical.proto.railway;
+
+service RailwayService {
+  rpc GetAllStations(google.protobuf.Empty) returns (StationList);
+  rpc GetNearStations(GetNearStationsRequest) returns (StationList);
+  rpc GetStation(GetStationRequest) returns (Station);
+  rpc GetAllPaths(GetPathsRequest) returns (PathList);
+  rpc GetPath(GetPathRequest) returns (Path);
+}
+
+service RailwayServiceAdmin {
+  rpc RegisterStation(RegisterStationRequest) returns (Station);
+  rpc RegisterPath(RegisterPathRequest) returns (Path);
+}
+
+message RegisterStationRequest {
+  string name = 1;
+  string city = 2;
+}
+
+message GetStationRequest {
+  int32 id = 1;
+}
+
+message GetNearStationsRequest {
+  int32 id = 1;
+}
+
+message Station {
+  int32 id = 1;
+  string name = 2;
+  string city = 3;
+  int32 platformCount = 4;
+}
+
+message StationList {
+  repeated Station stations = 1;
+}
+
+message RegisterPathRequest {
+  repeated int32 stationIds = 1;
+}
+
+message Path {
+  int32 id = 1;
+  repeated Station stations = 2;
+}
+
+message PathList {
+  repeated StationList paths = 1;
+}
+
+message GetPathRequest {
+  string uuid = 1;
+}
+
+message GetPathsRequest {
+  optional int32 departureStationId = 1;
+  optional int32 arrivalStationId = 2;
+}
