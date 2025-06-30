@@ -3,12 +3,15 @@ package it.trenical.server.railway.repositories;
 import it.trenical.server.railway.dao.StationDao;
 import it.trenical.server.railway.db.StationDb;
 import it.trenical.server.railway.db.helpers.LinkDatabaseHelper;
+import it.trenical.server.railway.db.helpers.PathDatabaseHelper;
 import it.trenical.server.railway.db.helpers.StationDatabaseHelper;
+import it.trenical.server.railway.models.Path;
 import it.trenical.server.railway.models.Station;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class StationRepository implements StationDao {
@@ -19,6 +22,7 @@ public class StationRepository implements StationDao {
         db.withConnection(connection->{
             StationDatabaseHelper.createTable(connection);
             LinkDatabaseHelper.createTable(connection);
+            PathDatabaseHelper.createTables(connection);
         });
     }
 
@@ -71,6 +75,20 @@ public class StationRepository implements StationDao {
     public Map<String, Double> getNeighbours(String station) {
         return db.withConnection(connection->{
             return LinkDatabaseHelper.getNeighbours(connection, station);
+        });
+    }
+
+    @Override
+    public Integer registerPath(List<String> stations) {
+        return db.withConnection(connection->{
+            return PathDatabaseHelper.insertPath(connection, stations);
+        });
+    }
+
+    @Override
+    public Path getPath(int id) {
+        return db.withConnection(connection->{
+           return PathDatabaseHelper.getPath(connection, id);
         });
     }
 }

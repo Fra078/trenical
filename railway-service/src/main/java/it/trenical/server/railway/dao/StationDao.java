@@ -1,6 +1,7 @@
 package it.trenical.server.railway.dao;
 
 import it.trenical.server.railway.db.helpers.LinkDatabaseHelper;
+import it.trenical.server.railway.models.Path;
 import it.trenical.server.railway.models.Station;
 
 import java.util.Collection;
@@ -18,4 +19,7 @@ public interface StationDao {
     boolean removeLink(String stationA, String stationB);
 
     Map<String, Double> getNeighbours(String station);
+
+    Integer registerPath(List<String> stations);
+    Path getPath(int id);
 }

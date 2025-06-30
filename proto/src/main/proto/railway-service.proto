@@ -14,7 +14,7 @@ service RailwayService {
   rpc UnLinkStations(UnlinkStationsRequest) returns (google.protobuf.Empty);
   rpc GetNearStations(GetNearStationsRequest) returns (GetNearStationsResponse);
 
-  rpc RegisterPath(RegisterPathRequest) returns (PathResponse);
+  rpc RegisterPath(RegisterPathRequest) returns (RegisterPathResponse);
   rpc GetAllPaths(GetPathsRequest) returns (PathList);
   rpc GetPath(GetPathRequest) returns (PathResponse);
 }
@@ -60,13 +60,23 @@ message GetNearStationsResponse {
   map<string, double> value = 1;
 }
 
+message LinkResponse {
+  string departure = 1;
+  string arrival = 2;
+  double distance = 3;
+}
+
 message RegisterPathRequest {
   repeated string stations = 1;
 }
 
+message RegisterPathResponse {
+  int32 id = 1;
+}
+
 message PathResponse {
   int32 id = 1;
-  repeated StationResponse stations = 2;
+  repeated LinkResponse links = 2;
 }
 
 message PathList {
@@ -74,7 +84,7 @@ message PathList {
 }
 
 message GetPathRequest {
-  string uuid = 1;
+  int32 id = 1;
 }
 
 message GetPathsRequest {

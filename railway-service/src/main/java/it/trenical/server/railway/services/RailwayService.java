@@ -6,7 +6,9 @@ import io.grpc.stub.StreamObserver;
 import it.trenical.proto.railway.*;
 import it.trenical.server.railway.dao.StationDao;
 import it.trenical.server.railway.mapper.RailwayMapper;
+import it.trenical.server.railway.models.Path;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -92,6 +94,33 @@ public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
         responseObserver.onNext(GetNearStationsResponse.newBuilder()
                         .putAllValue(result)
                         .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void registerPath(RegisterPathRequest request, StreamObserver<RegisterPathResponse> responseObserver) {
+        List<String> stations = request.getStationsList();
+        if (stations.size() < 2) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+            return;
+        }
+        Integer id = stationDao.registerPath(stations);
+        if (id == null) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(RegisterPathResponse.newBuilder().setId(id).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getPath(GetPathRequest request, StreamObserver<PathResponse> responseObserver) {
+        Path path = stationDao.getPath(request.getId());
+        if (path == null) {
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(RailwayMapper.toDto(path));
         responseObserver.onCompleted();
     }
 }

@@ -3,6 +3,8 @@ package it.trenical.admin.railway;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import it.trenical.admin.railway.commands.*;
+import it.trenical.admin.railway.commands.path.GetPathCommand;
+import it.trenical.admin.railway.commands.path.RegisterPathCommand;
 import it.trenical.frontend.cli.Cli;
 
 public class RailwayMenu extends Cli {
@@ -21,7 +23,9 @@ public class RailwayMenu extends Cli {
                 new StationUnlinkCommand(channel),
                 new NearStationsCommand(channel),
                 new StationLinkCommand(channel),
-                new StationUnlinkCommand(channel)
+                new StationUnlinkCommand(channel),
+                new RegisterPathCommand(channel),
+                new GetPathCommand(channel)
         );
     }
 
