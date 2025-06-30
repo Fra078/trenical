@@ -6,10 +6,9 @@ import io.grpc.stub.StreamObserver;
 import it.trenical.proto.railway.*;
 import it.trenical.server.railway.dao.StationDao;
 import it.trenical.server.railway.mapper.RailwayMapper;
-import it.trenical.server.railway.models.Station;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
 
@@ -66,7 +65,33 @@ public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
     }
 
     @Override
-    public void getNearStations(GetNearStationsRequest request, StreamObserver<StationList> responseObserver) {
-        super.getNearStations(request, responseObserver);
+    public void linkStations(LinkStationsRequest request, StreamObserver<Empty> responseObserver) {
+        boolean done = stationDao.insertLink(request.getStation1(), request.getStation2(), request.getDistance());
+        if (done) {
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+        }
+    }
+
+    @Override
+    public void unLinkStations(UnlinkStationsRequest request, StreamObserver<Empty> responseObserver) {
+        boolean done = stationDao.removeLink(request.getStation1(), request.getStation2());
+        if (done) {
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getNearStations(GetNearStationsRequest request, StreamObserver<GetNearStationsResponse> responseObserver) {
+        Map<String, Double> result = stationDao.getNeighbours(request.getName());
+        responseObserver.onNext(GetNearStationsResponse.newBuilder()
+                        .putAllValue(result)
+                        .build());
+        responseObserver.onCompleted();
     }
 }

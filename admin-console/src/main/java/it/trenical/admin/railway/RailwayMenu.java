@@ -19,7 +19,9 @@ public class RailwayMenu extends Cli {
                 new StationRemoveCommand(channel),
                 new StationLinkCommand(channel),
                 new StationUnlinkCommand(channel),
-                new NearStationsCommand(channel)
+                new NearStationsCommand(channel),
+                new StationLinkCommand(channel),
+                new StationUnlinkCommand(channel)
         );
     }
 
