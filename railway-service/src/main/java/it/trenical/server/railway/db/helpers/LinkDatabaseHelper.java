@@ -1,7 +1,5 @@
 package it.trenical.server.railway.db.helpers;
 
-import it.trenical.server.railway.models.Station;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

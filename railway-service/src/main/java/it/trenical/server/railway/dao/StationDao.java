@@ -1,6 +1,5 @@
 package it.trenical.server.railway.dao;
 
-import it.trenical.server.railway.db.helpers.LinkDatabaseHelper;
 import it.trenical.server.railway.models.Path;
 import it.trenical.server.railway.models.Station;
 

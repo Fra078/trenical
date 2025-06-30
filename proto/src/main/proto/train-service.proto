@@ -1,0 +1,67 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "railway-service.proto";
+option java_multiple_files = true;
+
+package it.trenical.proto.train;
+
+
+service TrainManager {
+  rpc RegisterTrainType(TrainType) returns (google.protobuf.Empty);
+  rpc GetAllTrainTypes(google.protobuf.Empty) returns (stream TrainType);
+  rpc GetTrainTypeByName(TrainTypeByNameRequest) returns (TrainType);
+  rpc RemoveTrainTypeByName(TrainTypeByNameRequest) returns (google.protobuf.Empty);
+
+  rpc RegisterServiceClass(ServiceClass) returns (google.protobuf.Empty);
+  rpc GetAllServiceClasses(google.protobuf.Empty) returns (stream ServiceClass);
+  rpc GetServiceClassByName(ServiceClassByNameRequest) returns (ServiceClass);
+  rpc RemoveServiceClassByName(ServiceClassByNameRequest) returns (google.protobuf.Empty);
+
+  rpc RegisterTrain(RegisterTrainRequest) returns (TrainResponse);
+  rpc GetAllTrains(google.protobuf.Empty) returns (stream TrainResponse);
+  rpc GetTrainById(TrainId) returns (TrainResponse);
+  rpc RemoveTrainById(TrainId) returns (google.protobuf.Empty);
+}
+
+
+
+message TrainType {
+  string name = 1;
+  string description = 2;
+  int32 speed = 3;
+  double costPerKm = 4;
+}
+
+message TrainTypeByNameRequest {
+  string name = 1;
+}
+
+message ServiceClass {
+  string name = 1;
+  string description = 2;
+  double incrementFactor = 3;
+}
+
+message ServiceClassByNameRequest {
+  string name = 1;
+}
+
+message RegisterTrainRequest {
+  string name = 1;
+  string typeName = 2;
+  int64 departureTime = 3;
+  map<string, int32> classSeats = 4;
+  int32 pathId = 5;
+}
+
+message TrainId {
+  int32 id = 1;
+}
+
+message TrainResponse {
+  int32 id = 1;
+  string name = 2;
+  TrainType type = 3;
+  int64 departureTime = 4;
+  it.trenical.proto.railway.PathResponse path = 5;
+}
