@@ -7,9 +7,9 @@ package it.trenical.proto.train;
 
 
 service TrainManager {
-  rpc RegisterTrainType(TrainType) returns (google.protobuf.Empty);
-  rpc GetAllTrainTypes(google.protobuf.Empty) returns (stream TrainType);
-  rpc GetTrainTypeByName(TrainTypeByNameRequest) returns (TrainType);
+  rpc RegisterTrainType(RegisterTrainTypeRequest) returns (google.protobuf.Empty);
+  rpc GetAllTrainTypes(google.protobuf.Empty) returns (stream TrainTypeResponse);
+  rpc GetTrainTypeByName(TrainTypeByNameRequest) returns (TrainTypeResponse);
   rpc RemoveTrainTypeByName(TrainTypeByNameRequest) returns (google.protobuf.Empty);
 
   rpc RegisterServiceClass(ServiceClass) returns (google.protobuf.Empty);
@@ -23,12 +23,15 @@ service TrainManager {
   rpc RemoveTrainById(TrainId) returns (google.protobuf.Empty);
 }
 
-
-
-message TrainType {
+message TrainTypeResponse {
   string name = 1;
-  string description = 2;
-  int32 speed = 3;
+  double speed = 3;
+  double costPerKm = 4;
+}
+
+message RegisterTrainTypeRequest {
+  string name = 1;
+  double speed = 3;
   double costPerKm = 4;
 }
 
@@ -38,7 +41,6 @@ message TrainTypeByNameRequest {
 
 message ServiceClass {
   string name = 1;
-  string description = 2;
   double incrementFactor = 3;
 }
 
@@ -61,7 +63,7 @@ message TrainId {
 message TrainResponse {
   int32 id = 1;
   string name = 2;
-  TrainType type = 3;
+  TrainTypeResponse type = 3;
   int64 departureTime = 4;
   it.trenical.proto.railway.PathResponse path = 5;
 }
