@@ -37,7 +37,7 @@ public class ServiceClassDbHelper {
     }
 
     public static ServiceClassModel get(Connection connection, String name) throws SQLException {
-        String sql = "SELECT * FROM TrainType WHERE name = ?";
+        String sql = "SELECT * FROM ServiceClass WHERE name = ?";
         try(PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, name);
             try(ResultSet rs = stmt.executeQuery()) {

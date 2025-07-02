@@ -2,10 +2,12 @@ package it.trenical.trainmanager.service;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.*;
 import it.trenical.trainmanager.dao.ServiceClassDao;
 import it.trenical.trainmanager.dao.TrainTypeDao;
+import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
@@ -16,6 +18,8 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     private final TrainTypeDao trainTypeDao = new TrainTypeRepository();
     private final ServiceClassDao serviceClassDao = new ServiceClassRepository();
+    private final TrainManager trainManager = new TrainManager();
+
 
     @Override
     public void getAllTrainTypes(Empty request, StreamObserver<TrainTypeResponse> responseObserver) {
@@ -95,5 +99,31 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
         }
     }
 
+    @Override
+    public void registerTrain(RegisterTrainRequest request, StreamObserver<TrainResponse> responseObserver) {
+        try {
+            responseObserver.onNext(trainManager.register(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            responseObserver.onError(e);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }
+    }
 
+    @Override
+    public void getTrainById(TrainId request, StreamObserver<TrainResponse> responseObserver) {
+        try {
+            responseObserver.onNext(trainManager.getTrainById(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            responseObserver.onError(e);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }
+    }
 }

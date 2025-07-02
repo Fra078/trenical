@@ -2,10 +2,13 @@ package it.trenical.server.railway.db.helpers;
 
 import it.trenical.server.railway.models.Link;
 import it.trenical.server.railway.models.Path;
+import it.trenical.server.railway.models.Station;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class PathDatabaseHelper {
 
@@ -70,7 +73,7 @@ public final class PathDatabaseHelper {
                         WHERE pi.path_id = ? AND pi.departure = l.station1 AND pi.arrival = l.station2
                         ORDER BY pi.stop_index
                       """;
-        List<Link> links = new ArrayList<>();
+        List<SimpleLink> links = new ArrayList<>();
         try(PreparedStatement stmt = connection.prepareStatement(sql)){
             stmt.setInt(1, pathId);
             try(ResultSet rs = stmt.executeQuery()){
@@ -78,11 +81,20 @@ public final class PathDatabaseHelper {
                     String departure = rs.getString("departure");
                     String arrival = rs.getString("arrival");
                     double distance = rs.getDouble("distance");
-                    links.add(new Link(pathId, departure, arrival, distance));
+                    links.add(new SimpleLink(departure, arrival, distance));
                 }
             }
         }
-        return new Path(pathId, links);
+
+        Map<String, Station> stations = new HashMap<>();
+        stations.put(links.getFirst().departure, StationDatabaseHelper.get(connection, links.getFirst().departure).orElseThrow());
+        for (SimpleLink link : links) {
+            stations.put(link.arrival, StationDatabaseHelper.get(connection, link.arrival).orElseThrow());
+        }
+        List<Link> fullLinks = links.stream().map(sl-> new Link(stations.get(sl.departure), stations.get(sl.arrival), sl.distance)).toList();
+        return new Path(pathId, fullLinks);
     }
+
+    private record SimpleLink(String departure, String arrival, double distance) {}
 
 }

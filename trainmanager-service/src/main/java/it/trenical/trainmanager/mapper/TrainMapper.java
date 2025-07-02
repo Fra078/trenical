@@ -1,10 +1,12 @@
 package it.trenical.trainmanager.mapper;
 
-import it.trenical.proto.train.RegisterTrainTypeRequest;
-import it.trenical.proto.train.ServiceClass;
-import it.trenical.proto.train.TrainTypeResponse;
+import it.trenical.proto.railway.PathResponse;
+import it.trenical.proto.train.*;
 import it.trenical.trainmanager.models.ServiceClassModel;
+import it.trenical.trainmanager.models.TrainEntity;
 import it.trenical.trainmanager.models.TrainType;
+
+import java.util.Map;
 
 public class TrainMapper {
 
@@ -36,6 +38,24 @@ public class TrainMapper {
                 request.getName(),
                 request.getIncrementFactor()
         );
+    }
+
+    public static TrainResponse toDto(
+            TrainEntity train, TrainType type, PathResponse path, Map<ServiceClassModel, Integer> seats
+    ){
+        return TrainResponse.newBuilder()
+                .setId(train.id())
+                .setName(train.name())
+                .setType(toDto(type))
+                .setDepartureTime(train.departureTime())
+                .setPath(path)
+                .addAllSeats(seats.entrySet().stream()
+                        .map(entry-> ClassSeats.newBuilder()
+                                        .setServiceClass(toDto(entry.getKey()))
+                                        .setCount(entry.getValue()).build())
+                        .toList())
+                .putAllPlatformChoices(train.platformChoice())
+                .build();
     }
 
 }

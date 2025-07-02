@@ -61,8 +61,8 @@ message GetNearStationsResponse {
 }
 
 message LinkResponse {
-  string departure = 1;
-  string arrival = 2;
+  StationResponse departure = 1;
+  StationResponse arrival = 2;
   double distance = 3;
 }
 

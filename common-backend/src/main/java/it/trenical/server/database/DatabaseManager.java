@@ -34,49 +34,18 @@ public class DatabaseManager {
         }
     }
 
-
-    protected void doWithStatement(String sqlCommand, SqlAction<PreparedStatement> function) {
-        try (Connection connection = getConnection();
-            PreparedStatement statement = connection.prepareStatement(sqlCommand)
-        ){
-            function.execute(statement);
-        } catch (SQLException e) {
-            System.err.println("Errore durante l'interazione con il database:");
-        }
+    public <O> O withConnection(boolean autoCommit, ComplSqlAction<Connection, O> action) {
+        return withConnection(connection -> {
+            connection.setAutoCommit(autoCommit);
+            return action.execute(connection);
+        });
     }
 
-    protected void doWithStatement(SqlAction<Statement> function) {
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement()
-        ){
-            function.execute(statement);
-        } catch (SQLException e) {
-            System.err.println("Errore durante l'interazione con il database:");
-        }
-    }
-
-    protected <T> T executeQuery(
-            String sqlCommand,
-            SqlAction<PreparedStatement> setParams,
-            SqlQueryAction<ResultSet, T> action
-    ) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(sqlCommand)
-        ){
-            setParams.execute(statement);
-            ResultSet resultSet = statement.executeQuery();
-            return action.execute(resultSet);
-        } catch (SQLException e) {
-            System.err.println("Errore durante l'interazione con il database:");
-        }
-        return null;
-    }
-
-    protected <T> T executeQuery(
-            String sqlCommand,
-            SqlQueryAction<ResultSet, T> action
-    ) {
-        return executeQuery(sqlCommand, st->{}, action);
+    public void withConnection(boolean autoCommit, SqlAction<Connection> action) {
+        withConnection(connection -> {
+            connection.setAutoCommit(autoCommit);
+            action.execute(connection);
+        });
     }
 
     public interface SqlAction<T> {
@@ -85,9 +54,5 @@ public class DatabaseManager {
 
     public interface ComplSqlAction<I,O> {
         O execute(I statement) throws SQLException;
-    }
-
-    protected interface SqlQueryAction<T, R> {
-        R execute(T statement) throws SQLException;
     }
 }

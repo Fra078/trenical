@@ -53,11 +53,17 @@ message RegisterTrainRequest {
   string typeName = 2;
   int64 departureTime = 3;
   map<string, int32> classSeats = 4;
-  int32 pathId = 5;
+  map<string, int32> platformChoices = 5;
+  int32 pathId = 6;
 }
 
 message TrainId {
   int32 id = 1;
+}
+
+message ClassSeats {
+  ServiceClass serviceClass = 1;
+  int32 count = 2;
 }
 
 message TrainResponse {
@@ -66,4 +72,6 @@ message TrainResponse {
   TrainTypeResponse type = 3;
   int64 departureTime = 4;
   it.trenical.proto.railway.PathResponse path = 5;
+  repeated ClassSeats seats = 6;
+  map<string, int32> platformChoices = 7;
 }

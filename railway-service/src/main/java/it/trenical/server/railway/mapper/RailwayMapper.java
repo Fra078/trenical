@@ -28,8 +28,8 @@ public class RailwayMapper {
 
     public static LinkResponse toDto(Link link) {
         return LinkResponse.newBuilder()
-                .setArrival(link.arrival())
-                .setDeparture(link.departure())
+                .setArrival(toDto(link.arrival()))
+                .setDeparture(toDto(link.departure()))
                 .setDistance(link.distance())
                 .build();
     }

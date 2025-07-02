@@ -25,7 +25,7 @@ public class GetPathCommand extends Command {
         );
         System.out.println(resp.getId());
         for (LinkResponse link : resp.getLinksList()) {
-            System.out.printf("%s -> %s : %.2f%n", link.getDeparture(), link.getArrival(), link.getDistance());
+            System.out.printf("%s -> %s : %.2f%n", link.getDeparture().getName(), link.getArrival().getName(), link.getDistance());
         }
     }
 
