@@ -1,6 +1,6 @@
 package it.trenical.trainmanager.repository.db;
 
-import it.trenical.trainmanager.db.TrainDb;
+import it.trenical.server.database.DatabaseManager;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 
@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class TrainTypeJdbcRepository implements TrainTypeRepository {
-    private final TrainDb db;
+    private final DatabaseManager db;
 
-    public TrainTypeJdbcRepository(TrainDb db) {
+    public TrainTypeJdbcRepository(DatabaseManager db) {
         this.db = db;
         db.withConnection(this::createTable);
     }

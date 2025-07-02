@@ -10,7 +10,7 @@ public class DatabaseManager {
 
     private final String fileName;
 
-    protected DatabaseManager(String fileName) {
+    public DatabaseManager(String fileName) {
         this.fileName = fileName;
     }
 

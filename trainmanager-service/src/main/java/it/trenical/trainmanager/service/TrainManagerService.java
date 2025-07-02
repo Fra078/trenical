@@ -5,12 +5,14 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.*;
+import it.trenical.server.database.DatabaseManager;
 import it.trenical.trainmanager.client.RailwayClient;
 import it.trenical.trainmanager.db.TrainDb;
 import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
+import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
 import it.trenical.trainmanager.repository.db.TrainJdbcRepository;
@@ -22,18 +24,15 @@ import java.util.Optional;
 
 public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
-    private final TrainDb db = new TrainDb();
-    private final TrainRepository trainRepository = new TrainJdbcRepository(db);
-    private final TrainTypeRepository typeRepository = new TrainTypeJdbcRepository(db);
-    private final ServiceClassJdbcRepository serviceClassRepository = new ServiceClassJdbcRepository(db);
-    private final RailwayClient railwayClient = RailwayClient.getInstance();
-    private final TrainManager trainManager = new TrainManager(
-            trainRepository,
-            typeRepository,
-            serviceClassRepository,
-            railwayClient,
-            new DefaultPlatformAssignmentStrategy()
-    );
+    private final TrainManager trainManager;
+    private final ServiceClassRepository classRepository;
+    private final TrainTypeRepository typeRepository;
+
+    public TrainManagerService(TrainManager trainManager, ServiceClassRepository classRepository, TrainTypeRepository typeRepository) {
+        this.trainManager = trainManager;
+        this.classRepository = classRepository;
+        this.typeRepository = typeRepository;
+    }
 
     @Override
     public void getAllTrainTypes(Empty request, StreamObserver<TrainTypeResponse> responseObserver) {
@@ -76,13 +75,13 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void getAllServiceClasses(Empty request, StreamObserver<ServiceClass> responseObserver) {
-        serviceClassRepository.findAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
+        classRepository.findAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
         responseObserver.onCompleted();
     }
 
     @Override
     public void getServiceClassByName(ServiceClassByNameRequest request, StreamObserver<ServiceClass> responseObserver) {
-        Optional<ServiceClassModel> result = serviceClassRepository.findByName(request.getName());
+        Optional<ServiceClassModel> result = classRepository.findByName(request.getName());
         if (result.isEmpty())
             responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         else {
@@ -93,7 +92,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void registerServiceClass(ServiceClass request, StreamObserver<Empty> responseObserver) {
-        boolean done = serviceClassRepository.save(TrainMapper.fromDto(request));
+        boolean done = classRepository.save(TrainMapper.fromDto(request));
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
@@ -104,7 +103,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void removeServiceClassByName(ServiceClassByNameRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = serviceClassRepository.deleteByName(request.getName());
+        boolean done = classRepository.deleteByName(request.getName());
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
