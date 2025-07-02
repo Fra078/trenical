@@ -11,8 +11,9 @@ import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
-import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
+import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
+import it.trenical.trainmanager.repository.db.TrainJdbcRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.repository.db.TrainTypeJdbcRepository;
 
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     private final TrainDb db = new TrainDb();
-    private final TrainRepository trainRepository = new TrainRepository();
+    private final TrainRepository trainRepository = new TrainJdbcRepository(db);
     private final TrainTypeRepository typeRepository = new TrainTypeJdbcRepository(db);
     private final ServiceClassJdbcRepository serviceClassRepository = new ServiceClassJdbcRepository(db);
     private final RailwayClient railwayClient = RailwayClient.getInstance();
@@ -30,9 +31,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
             typeRepository,
             serviceClassRepository,
             railwayClient
-
     );
-
 
     @Override
     public void getAllTrainTypes(Empty request, StreamObserver<TrainTypeResponse> responseObserver) {

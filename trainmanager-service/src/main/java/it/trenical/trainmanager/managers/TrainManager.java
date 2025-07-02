@@ -1,6 +1,5 @@
 package it.trenical.trainmanager.managers;
 
-import io.grpc.Status;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
 import it.trenical.proto.train.RegisterTrainRequest;
@@ -11,7 +10,7 @@ import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
 import it.trenical.trainmanager.models.TrainType;
-import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
+import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.utilities.Validator;
@@ -26,10 +25,10 @@ public class TrainManager {
 
     private final TrainRepository trainRepository;
     private final TrainTypeRepository typeRepository;
-    private final ServiceClassJdbcRepository classRepository;
+    private final ServiceClassRepository classRepository;
     private final RailwayClient railClient;
 
-    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassJdbcRepository classRepository, RailwayClient railClient) {
+    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassRepository classRepository, RailwayClient railClient) {
         this.trainRepository = trainRepository;
         this.typeRepository = typeRepository;
         this.classRepository = classRepository;
@@ -83,15 +82,15 @@ public class TrainManager {
 
         builder.setPlatformChoice(finalChoices);
 
-        TrainEntity train = trainRepository.create(builder.build());
+        TrainEntity train = trainRepository.save(builder.build());
         return TrainMapper.toDto(train, type, path, seatsMap);
 
     }
 
     public TrainResponse getTrainById(TrainId request) {
-        TrainEntity entity = trainRepository.getTrainById(request.getId());
-        if (entity == null)
-            throw Status.NOT_FOUND.withDescription("Train with " + request.getId() + " non exists").asRuntimeException();
+        TrainEntity entity = trainRepository.findById(request.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Train not found")
+        );
         TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
         PathResponse path = railClient.getPath(entity.pathId());
         Map<ServiceClassModel, Integer> map = entity.classSeats().entrySet().stream()
