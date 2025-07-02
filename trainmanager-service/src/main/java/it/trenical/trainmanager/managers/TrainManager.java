@@ -11,7 +11,7 @@ import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
 import it.trenical.trainmanager.models.TrainType;
-import it.trenical.trainmanager.repository.ServiceClassRepository;
+import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.utilities.Validator;
@@ -26,10 +26,10 @@ public class TrainManager {
 
     private final TrainRepository trainRepository;
     private final TrainTypeRepository typeRepository;
-    private final ServiceClassRepository classRepository;
+    private final ServiceClassJdbcRepository classRepository;
     private final RailwayClient railClient;
 
-    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassRepository classRepository, RailwayClient railClient) {
+    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassJdbcRepository classRepository, RailwayClient railClient) {
         this.trainRepository = trainRepository;
         this.typeRepository = typeRepository;
         this.classRepository = classRepository;
@@ -52,9 +52,8 @@ public class TrainManager {
 
         Map<ServiceClassModel, Integer> seatsMap = request.getClassSeatsMap().entrySet().stream()
                 .map(entry->{
-                    ServiceClassModel sc = classRepository.getByName(entry.getKey());
-                    if (sc == null)
-                        throw new IllegalArgumentException("Class with name " + entry.getKey() + " not found");
+                    ServiceClassModel sc = classRepository.findByName(entry.getKey()).orElseThrow(
+                            () -> new IllegalArgumentException("Class with name " + entry.getKey() + " not found"));
                     if (entry.getValue() <= 0)
                         throw new IllegalArgumentException("Seats must be greater than 0");
                     return Map.entry(sc, entry.getValue());
@@ -97,7 +96,7 @@ public class TrainManager {
         PathResponse path = railClient.getPath(entity.pathId());
         Map<ServiceClassModel, Integer> map = entity.classSeats().entrySet().stream()
                 .map(entry->
-                        Map.entry(classRepository.getByName(entry.getKey()), entry.getValue())
+                        Map.entry(classRepository.findByName(entry.getKey()).orElseThrow(), entry.getValue())
                 ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return TrainMapper.toDto(entity, type, path, map);
