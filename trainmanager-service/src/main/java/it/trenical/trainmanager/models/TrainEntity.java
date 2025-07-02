@@ -7,7 +7,7 @@ public record TrainEntity(Integer id,
                           String type,
                           long departureTime,
                           int pathId,
-                          Map<String, Integer> classSeats,
+                          Map<ServiceClassModel, Integer> classSeats,
                           Map<String, Integer> platformChoice) {
 
     public static Builder builder() {
@@ -24,7 +24,7 @@ public record TrainEntity(Integer id,
         private String type;
         private Long departureTime;
         private int pathId;
-        private Map<String, Integer> classSeats;
+        private Map<ServiceClassModel, Integer> classSeats;
         private Map<String, Integer> platformChoice;
 
         public TrainEntity build() {
@@ -88,11 +88,11 @@ public record TrainEntity(Integer id,
             return this;
         }
 
-        public Map<String, Integer> getClassSeats() {
+        public Map<ServiceClassModel, Integer> getClassSeats() {
             return classSeats;
         }
 
-        public Builder setClassSeats(Map<String, Integer> classSeats) {
+        public Builder setClassSeats(Map<ServiceClassModel, Integer> classSeats) {
             this.classSeats = Map.copyOf(classSeats);
             return this;
         }

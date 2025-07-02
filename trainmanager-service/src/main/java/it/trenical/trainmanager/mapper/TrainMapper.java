@@ -41,7 +41,7 @@ public class TrainMapper {
     }
 
     public static TrainResponse toDto(
-            TrainEntity train, TrainType type, PathResponse path, Map<ServiceClassModel, Integer> seats
+            TrainEntity train, TrainType type, PathResponse path
     ){
         return TrainResponse.newBuilder()
                 .setId(train.id())
@@ -49,7 +49,7 @@ public class TrainMapper {
                 .setType(toDto(type))
                 .setDepartureTime(train.departureTime())
                 .setPath(path)
-                .addAllSeats(seats.entrySet().stream()
+                .addAllSeats(train.classSeats().entrySet().stream()
                         .map(entry-> ClassSeats.newBuilder()
                                         .setServiceClass(toDto(entry.getKey()))
                                         .setCount(entry.getValue()).build())

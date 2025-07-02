@@ -16,6 +16,7 @@ import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
 import it.trenical.trainmanager.repository.db.TrainJdbcRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.repository.db.TrainTypeJdbcRepository;
+import it.trenical.trainmanager.strategy.impl.DefaultPlatformAssignmentStrategy;
 
 import java.util.Optional;
 
@@ -30,7 +31,8 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
             trainRepository,
             typeRepository,
             serviceClassRepository,
-            railwayClient
+            railwayClient,
+            new DefaultPlatformAssignmentStrategy()
     );
 
     @Override

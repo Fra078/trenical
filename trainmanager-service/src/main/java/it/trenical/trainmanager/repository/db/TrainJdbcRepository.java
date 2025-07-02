@@ -1,6 +1,7 @@
 package it.trenical.trainmanager.repository.db;
 
 import it.trenical.trainmanager.db.TrainDb;
+import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
 import it.trenical.trainmanager.repository.TrainRepository;
 
@@ -53,12 +54,12 @@ public class TrainJdbcRepository implements TrainRepository {
         }
     }
 
-    private void insertSeats(Connection connection, int trainId, Map<String, Integer> seats) throws SQLException {
+    private void insertSeats(Connection connection, int trainId, Map<ServiceClassModel, Integer> seats) throws SQLException {
         String sql = "INSERT INTO TrainSeat (train_id, className, count) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, trainId);
-            for (Map.Entry<String, Integer> entry : seats.entrySet()) {
-                stmt.setString(2, entry.getKey());
+            for (Map.Entry<ServiceClassModel, Integer> entry : seats.entrySet()) {
+                stmt.setString(2, entry.getKey().name());
                 stmt.setInt(3, entry.getValue());
                 stmt.addBatch();
             }
@@ -98,21 +99,35 @@ public class TrainJdbcRepository implements TrainRepository {
         return Optional.of(builder.build());
     }
 
-    private Map<String, Integer> getSeats(Connection connection, int trainId) throws SQLException {
-        String sql = "SELECT * FROM TrainSeat WHERE train_id = ?";
-        Map<String, Integer> seats = new HashMap<>();
-        try(PreparedStatement stmt = connection.prepareStatement(sql)) {
+    private Map<ServiceClassModel, Integer> getSeats(Connection connection, int trainId) throws SQLException {
+        String sql = """
+                 SELECT sc.name AS class_name, 
+                        sc.incrementFactor AS increment_factor,
+                        ts.count AS seat_count
+                 FROM TrainSeat ts
+                 JOIN ServiceClass sc ON sc.name = ts.className
+                 WHERE ts.train_id = ?
+                 """;
+
+        Map<ServiceClassModel, Integer> seats = new HashMap<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, trainId);
-            try(ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    String serviceClass = rs.getString("className");
-                    int count = rs.getInt("count");
-                    seats.put(serviceClass, count);
+                    String className = rs.getString("class_name");
+                    double incrementFactor = rs.getDouble("increment_factor");
+                    int count = rs.getInt("seat_count");
+
+                    ServiceClassModel model = new ServiceClassModel(className, incrementFactor);
+                    seats.put(model, count);
                 }
             }
         }
+
         return seats;
     }
+
 
     private Map<String, Integer> getChosenPlatform(Connection connection, int trainId) throws SQLException {
         String sql = "SELECT * FROM TrainStationPlatform WHERE train_id = ?";
