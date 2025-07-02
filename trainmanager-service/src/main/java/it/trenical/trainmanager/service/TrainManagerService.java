@@ -5,42 +5,56 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.*;
+import it.trenical.trainmanager.client.RailwayClient;
 import it.trenical.trainmanager.dao.ServiceClassDao;
-import it.trenical.trainmanager.dao.TrainTypeDao;
+import it.trenical.trainmanager.db.TrainDb;
 import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
+import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
+import it.trenical.trainmanager.repository.db.TrainTypeJdbcRepository;
+
+import java.util.Optional;
 
 public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
-    private final TrainTypeDao trainTypeDao = new TrainTypeRepository();
-    private final ServiceClassDao serviceClassDao = new ServiceClassRepository();
-    private final TrainManager trainManager = new TrainManager();
+    private final TrainDb db = new TrainDb();
+    private final TrainRepository trainRepository = new TrainRepository();
+    private final TrainTypeRepository typeRepository = new TrainTypeJdbcRepository(db);
+    private final ServiceClassRepository serviceClassRepository = new ServiceClassRepository();
+    private final RailwayClient railwayClient = RailwayClient.getInstance();
+    private final TrainManager trainManager = new TrainManager(
+            trainRepository,
+            typeRepository,
+            serviceClassRepository,
+            railwayClient
+
+    );
 
 
     @Override
     public void getAllTrainTypes(Empty request, StreamObserver<TrainTypeResponse> responseObserver) {
-        trainTypeDao.getAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
+        typeRepository.findAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
         responseObserver.onCompleted();
     }
 
     @Override
     public void getTrainTypeByName(TrainTypeByNameRequest request, StreamObserver<TrainTypeResponse> responseObserver) {
-        TrainType result = trainTypeDao.getByName(request.getName());
-        if (result == null)
+        Optional<TrainType> result = typeRepository.findByName(request.getName());
+        if (result.isEmpty())
             responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         else {
-            responseObserver.onNext(TrainMapper.toDto(result));
+            responseObserver.onNext(TrainMapper.toDto(result.get()));
             responseObserver.onCompleted();
         }
     }
 
     @Override
     public void registerTrainType(RegisterTrainTypeRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = trainTypeDao.register(TrainMapper.fromRequest(request));
+        boolean done = typeRepository.save(TrainMapper.fromRequest(request));
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
@@ -51,7 +65,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void removeTrainTypeByName(TrainTypeByNameRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = trainTypeDao.removeByName(request.getName());
+        boolean done = typeRepository.deleteByName(request.getName());
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
@@ -62,13 +76,13 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void getAllServiceClasses(Empty request, StreamObserver<ServiceClass> responseObserver) {
-        serviceClassDao.getAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
+        serviceClassRepository.getAll(type-> responseObserver.onNext(TrainMapper.toDto(type)));
         responseObserver.onCompleted();
     }
 
     @Override
     public void getServiceClassByName(ServiceClassByNameRequest request, StreamObserver<ServiceClass> responseObserver) {
-        ServiceClassModel result = serviceClassDao.getByName(request.getName());
+        ServiceClassModel result = serviceClassRepository.getByName(request.getName());
         if (result == null)
             responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         else {
@@ -79,7 +93,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void registerServiceClass(ServiceClass request, StreamObserver<Empty> responseObserver) {
-        boolean done = serviceClassDao.register(TrainMapper.fromDto(request));
+        boolean done = serviceClassRepository.register(TrainMapper.fromDto(request));
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
@@ -90,7 +104,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
 
     @Override
     public void removeServiceClassByName(ServiceClassByNameRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = serviceClassDao.removeByName(request.getName());
+        boolean done = serviceClassRepository.removeByName(request.getName());
         if (done){
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();

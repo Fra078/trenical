@@ -1,12 +1,9 @@
 package it.trenical.trainmanager.managers;
 
 import io.grpc.Status;
-import io.grpc.StatusException;
-import io.grpc.stub.StreamObserver;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
 import it.trenical.proto.train.RegisterTrainRequest;
-import it.trenical.proto.train.ServiceClass;
 import it.trenical.proto.train.TrainId;
 import it.trenical.proto.train.TrainResponse;
 import it.trenical.trainmanager.client.RailwayClient;
@@ -22,18 +19,22 @@ import it.trenical.trainmanager.utilities.Validator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TrainManager {
 
-    private final TrainRepository trainRepository = new TrainRepository();
-    private final TrainTypeRepository typeRepository = new TrainTypeRepository();
-    private final ServiceClassRepository classRepository = new ServiceClassRepository();
-    private final RailwayClient railClient = RailwayClient.getInstance();
+    private final TrainRepository trainRepository;
+    private final TrainTypeRepository typeRepository;
+    private final ServiceClassRepository classRepository;
+    private final RailwayClient railClient;
 
-    public TrainManager() {}
+    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassRepository classRepository, RailwayClient railClient) {
+        this.trainRepository = trainRepository;
+        this.typeRepository = typeRepository;
+        this.classRepository = classRepository;
+        this.railClient = railClient;
+    }
 
     public TrainResponse register(RegisterTrainRequest request) {
         if (Validator.isBlank(request.getName()))
@@ -44,9 +45,8 @@ public class TrainManager {
                 .setName(request.getName())
                 .setDepartureTime(request.getDepartureTime());
 
-        TrainType type = typeRepository.getByName(request.getTypeName());
-        if(type == null)
-            throw new IllegalArgumentException("TrainType with name " + request.getTypeName() + " not found");
+        TrainType type = typeRepository.findByName(request.getTypeName()).orElseThrow(
+                () -> new IllegalArgumentException("TrainType with name " + request.getTypeName() + " not found"));
         builder.setType(type.name());
 
 
@@ -93,7 +93,7 @@ public class TrainManager {
         TrainEntity entity = trainRepository.getTrainById(request.getId());
         if (entity == null)
             throw Status.NOT_FOUND.withDescription("Train with " + request.getId() + " non exists").asRuntimeException();
-        TrainType type = typeRepository.getByName(entity.type());
+        TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
         PathResponse path = railClient.getPath(entity.pathId());
         Map<ServiceClassModel, Integer> map = entity.classSeats().entrySet().stream()
                 .map(entry->
