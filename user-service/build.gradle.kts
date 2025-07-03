@@ -10,6 +10,12 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":proto"))
+    implementation(project(":common-backend"))
+    implementation("io.grpc:grpc-netty-shaded:1.64.0")
+    implementation("io.grpc:grpc-stub:1.64.0")
+    implementation("io.grpc:grpc-protobuf:1.64.0")
+
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")

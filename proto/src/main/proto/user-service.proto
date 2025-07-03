@@ -1,0 +1,35 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option java_multiple_files = true;
+
+package it.trenical.user.proto;
+
+service UserService {
+  rpc Register(SignupRequest) returns (LoginResponse);
+  rpc Login(SigninRequest) returns (LoginResponse);
+}
+
+message SignupRequest {
+  string username = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+}
+
+message LoginResponse {
+  string jwt = 1;
+  string username = 2;
+  string firstName = 3;
+  string lastName = 4;
+  UserType type = 5;
+}
+
+message SigninRequest {
+  string username = 1;
+  string password = 2;
+}
+
+enum UserType {
+  STANDARD = 0;
+  FIDELITY = 1;
+}

@@ -1,0 +1,24 @@
+package it.trenical.user;
+
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import it.trenical.server.database.DatabaseManager;
+import it.trenical.user.managers.LoginManager;
+import it.trenical.user.repository.UserRepository;
+import it.trenical.user.repository.jdbc.UserJdbcRepository;
+import it.trenical.user.services.UserServiceImpl;
+
+import java.io.IOException;
+
+public class UserServer {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        DatabaseManager db = new DatabaseManager("./user-db");
+        UserRepository userRepository = new UserJdbcRepository(db);
+        LoginManager loginManager = new LoginManager(userRepository);
+        Server server =ServerBuilder.forPort(5060)
+                .addService(new UserServiceImpl(loginManager))
+                .build().start();
+        System.out.println("Server started");
+        server.awaitTermination();
+    }
+}
