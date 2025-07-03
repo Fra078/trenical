@@ -2,7 +2,6 @@ package it.trenical.trainmanager.repository;
 
 import it.trenical.trainmanager.models.TrainType;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 

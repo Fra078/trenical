@@ -2,9 +2,7 @@ package it.trenical.trainmanager.strategy.impl;
 
 import it.trenical.trainmanager.strategy.PlatformAssignmentStrategy;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class StrictPlatformAssignmentStrategy implements PlatformAssignmentStrategy {
 

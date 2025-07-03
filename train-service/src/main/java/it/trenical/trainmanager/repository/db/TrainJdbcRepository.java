@@ -156,7 +156,7 @@ public class TrainJdbcRepository implements TrainRepository {
 
     private Map<ServiceClassModel, Integer> getSeats(Connection connection, int trainId) throws SQLException {
         String sql = """
-                 SELECT sc.name AS class_name, 
+                 SELECT sc.name AS class_name,
                         sc.incrementFactor AS increment_factor,
                         ts.count AS seat_count
                  FROM TrainSeat ts

@@ -7,8 +7,6 @@ import it.trenical.trainmanager.models.TrainEntity;
 import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.models.TrainType;
 
-import java.util.Map;
-
 public class TrainMapper {
 
     public static TrainTypeResponse toDto(TrainType trainType) {

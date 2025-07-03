@@ -10,7 +10,6 @@ import it.trenical.trainmanager.client.RailwayClient;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
-import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
@@ -20,7 +19,6 @@ import it.trenical.trainmanager.utilities.Validator;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

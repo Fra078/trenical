@@ -5,20 +5,12 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.*;
-import it.trenical.server.database.DatabaseManager;
-import it.trenical.trainmanager.client.RailwayClient;
-import it.trenical.trainmanager.db.TrainDb;
 import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
-import it.trenical.trainmanager.repository.TrainRepository;
-import it.trenical.trainmanager.repository.db.ServiceClassJdbcRepository;
-import it.trenical.trainmanager.repository.db.TrainJdbcRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
-import it.trenical.trainmanager.repository.db.TrainTypeJdbcRepository;
-import it.trenical.trainmanager.strategy.impl.DefaultPlatformAssignmentStrategy;
 
 import java.util.Optional;
 
