@@ -139,4 +139,15 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         }
     }
+
+    @Override
+    public void getAllTrains(TrainQueryParameters request, StreamObserver<TrainResponse> responseObserver) {
+        try {
+            trainManager.getAll(request, responseObserver::onNext);
+            responseObserver.onCompleted();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            responseObserver.onError(e);
+        }
+    }
 }

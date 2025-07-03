@@ -8,6 +8,7 @@ import it.trenical.admin.train.commands.serviceClass.RegisterServiceClassCommand
 import it.trenical.admin.train.commands.serviceClass.RemoveServiceClassCommand;
 import it.trenical.admin.train.commands.train.CreateTrainCommand;
 import it.trenical.admin.train.commands.train.GetTrainCommand;
+import it.trenical.admin.train.commands.train.ListTrainCommand;
 import it.trenical.admin.train.commands.type.GetTrainTypeCommand;
 import it.trenical.admin.train.commands.type.ListTrainTypesCommand;
 import it.trenical.admin.train.commands.type.RegisterTrainTypeCommand;
@@ -34,7 +35,8 @@ public class TrainManagerMenu extends Cli {
                 new RegisterServiceClassCommand(channel),
                 new RemoveServiceClassCommand(channel),
                 new CreateTrainCommand(channel),
-                new GetTrainCommand(stub)
+                new GetTrainCommand(stub),
+                new ListTrainCommand(stub)
         );
     }
 

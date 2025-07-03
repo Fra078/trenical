@@ -4,6 +4,7 @@ import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.train.*;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
+import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.models.TrainType;
 
 import java.util.Map;
@@ -56,6 +57,19 @@ public class TrainMapper {
                         .toList())
                 .putAllPlatformChoices(train.platformChoice())
                 .build();
+    }
+
+    public static TrainQueryParams fromDto(TrainQueryParameters request) {
+        TrainQueryParams.Builder builder = TrainQueryParams.builder();
+        if (request.hasType())
+            builder.setType(request.getType());
+        if (request.hasServiceClass())
+            builder.setServiceClass(request.getServiceClass());
+        if (request.hasDateRange())
+            builder.setDateRange(request.getDateRange().getFrom(), request.getDateRange().getTo());
+        if (request.hasPathId())
+            builder.setPathId(request.getPathId());
+        return builder.build();
     }
 
 }

@@ -21,7 +21,6 @@ public class GetTrainCommand extends Command {
             throw new BadCommandSyntaxException(getSyntax());
         int id = Integer.parseInt(args[0]);
         TrainResponse ts = stub.getTrainById(TrainId.newBuilder().setId(id).build());
-        var j = TrainPrinter.printTrain(TrainResponse.newBuilder().setName("CIAO").build());
         System.out.println(TrainPrinter.printTrain(ts));
     }
 

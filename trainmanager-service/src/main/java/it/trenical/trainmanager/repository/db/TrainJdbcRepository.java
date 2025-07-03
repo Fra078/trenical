@@ -3,12 +3,14 @@ package it.trenical.trainmanager.repository.db;
 import it.trenical.server.database.DatabaseManager;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
+import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.repository.TrainRepository;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class TrainJdbcRepository implements TrainRepository {
 
@@ -36,6 +38,13 @@ public class TrainJdbcRepository implements TrainRepository {
     public Optional<TrainEntity> findById(int id) {
         return db.withConnection(connection -> {
                 return getTrain(connection, id);
+        });
+    }
+
+    @Override
+    public void findAll(TrainQueryParams params, Consumer<TrainEntity> train) {
+        db.withConnection(connection -> {
+            getAll(connection, train, params);
         });
     }
 
@@ -77,6 +86,52 @@ public class TrainJdbcRepository implements TrainRepository {
                 stmt.addBatch();
             }
             stmt.executeBatch();
+        }
+    }
+
+    private void getAll(
+            Connection connection,
+            Consumer<TrainEntity> consumer,
+            TrainQueryParams params
+    ) throws SQLException {
+        StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM Train where 1=1");
+
+        if (params.type() != null)
+            sqlBuilder.append(" and typeName = ?");
+        if (params.dateFrom() != null && params.dateTo() != null)
+            sqlBuilder.append(" and departureTime >= ? and departureTime <= ?");
+        if (params.pathId() != null)
+            sqlBuilder.append(" and pathId = ?");
+        if (params.serviceClass() != null){
+            sqlBuilder.append(" and id IN ( SELECT train_id FROM TrainSeat WHERE className = ? )");
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sqlBuilder.toString())) {
+            int i = 1;
+            if (params.type() != null)
+                ps.setString(i++, params.type());
+            if (params.dateFrom() != null && params.dateTo() != null) {
+                ps.setLong(i++, params.dateFrom());
+                ps.setLong(i++, params.dateTo());
+            }
+            if (params.pathId() != null)
+                ps.setInt(i++, params.pathId());
+            if (params.serviceClass() != null)
+                ps.setString(i++, params.serviceClass());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TrainEntity.Builder builder = TrainEntity.builder()
+                            .setId(rs.getInt("id"))
+                            .setName(rs.getString("name"))
+                            .setType(rs.getString("typeName"))
+                            .setDepartureTime(rs.getLong("departureTime"))
+                            .setPathId(rs.getInt("pathId"));
+                    builder.setClassSeats(getSeats(connection, builder.getId()));
+                    builder.setPlatformChoice(getChosenPlatform(connection, builder.getId()));
+                    consumer.accept(builder.build());
+                }
+            }
         }
     }
 
@@ -128,7 +183,6 @@ public class TrainJdbcRepository implements TrainRepository {
         return seats;
     }
 
-
     private Map<String, Integer> getChosenPlatform(Connection connection, int trainId) throws SQLException {
         String sql = "SELECT * FROM TrainStationPlatform WHERE train_id = ?";
         Map<String, Integer> ret = new HashMap<>();
@@ -151,7 +205,7 @@ public class TrainJdbcRepository implements TrainRepository {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 typeName VARCHAR(255) NOT NULL,
-                departureTime VARCHAR(255) NOT NULL,
+                departureTime BIGINT NOT NULL,
                 pathId INT NOT NULL,
                 FOREIGN KEY (typeName) REFERENCES TrainType(name)
             );

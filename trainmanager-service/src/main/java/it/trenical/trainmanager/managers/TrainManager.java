@@ -4,11 +4,13 @@ import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
 import it.trenical.proto.train.RegisterTrainRequest;
 import it.trenical.proto.train.TrainId;
+import it.trenical.proto.train.TrainQueryParameters;
 import it.trenical.proto.train.TrainResponse;
 import it.trenical.trainmanager.client.RailwayClient;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
+import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
@@ -19,6 +21,7 @@ import it.trenical.trainmanager.utilities.Validator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,7 +74,6 @@ public class TrainManager {
 
         TrainEntity train = trainRepository.save(builder.build());
         return TrainMapper.toDto(train, type, path);
-
     }
 
     public TrainResponse getTrainById(TrainId request) {
@@ -82,6 +84,14 @@ public class TrainManager {
         PathResponse path = railClient.getPath(entity.pathId());
 
         return TrainMapper.toDto(entity, type, path);
+    }
+
+    public void getAll(TrainQueryParameters params, Consumer<TrainResponse> consumer){
+        trainRepository.findAll(TrainMapper.fromDto(params), entity->{
+            TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
+            PathResponse path = railClient.getPath(entity.pathId());
+            consumer.accept(TrainMapper.toDto(entity, type, path));
+        });
     }
 
     private Map<ServiceClassModel, Integer> getAndValidateClassSeats(Map<String, Integer> seats) {

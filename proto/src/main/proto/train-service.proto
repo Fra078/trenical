@@ -18,7 +18,7 @@ service TrainManager {
   rpc RemoveServiceClassByName(ServiceClassByNameRequest) returns (google.protobuf.Empty);
 
   rpc RegisterTrain(RegisterTrainRequest) returns (TrainResponse);
-  rpc GetAllTrains(google.protobuf.Empty) returns (stream TrainResponse);
+  rpc GetAllTrains(TrainQueryParameters) returns (stream TrainResponse);
   rpc GetTrainById(TrainId) returns (TrainResponse);
   rpc RemoveTrainById(TrainId) returns (google.protobuf.Empty);
 }
@@ -74,4 +74,16 @@ message TrainResponse {
   it.trenical.proto.railway.PathResponse path = 5;
   repeated ClassSeats seats = 6;
   map<string, int32> platformChoices = 7;
+}
+
+message DateRange {
+  int64 from = 1;
+  int64 to = 2;
+}
+
+message TrainQueryParameters {
+  optional int32 pathId = 1;
+  optional string type = 2;
+  optional string serviceClass = 3;
+  optional DateRange dateRange= 4;
 }
