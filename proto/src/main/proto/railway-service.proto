@@ -6,7 +6,7 @@ package it.trenical.proto.railway;
 
 service RailwayService {
   rpc RegisterStation(RegisterStationRequest) returns (google.protobuf.Empty);
-  rpc GetAllStations(google.protobuf.Empty) returns (StationList);
+  rpc GetAllStations(google.protobuf.Empty) returns (stream StationResponse);
   rpc GetStation(GetStationRequest) returns (StationResponse);
   rpc DeleteStation(DeleteStationRequest) returns (google.protobuf.Empty);
 
@@ -15,9 +15,11 @@ service RailwayService {
   rpc GetNearStations(GetNearStationsRequest) returns (GetNearStationsResponse);
 
   rpc RegisterPath(RegisterPathRequest) returns (RegisterPathResponse);
-  rpc GetAllPaths(GetPathsRequest) returns (PathList);
+  rpc GetAllPaths(google.protobuf.Empty) returns (stream PathResponse);
+  rpc GetPaths(PathsQueryParams) returns (stream PathResponse);
   rpc GetPath(GetPathRequest) returns (PathResponse);
 }
+
 message RegisterStationRequest {
   string name = 1;
   string city = 2;
@@ -60,12 +62,6 @@ message GetNearStationsResponse {
   map<string, double> value = 1;
 }
 
-message LinkResponse {
-  StationResponse departure = 1;
-  StationResponse arrival = 2;
-  double distance = 3;
-}
-
 message RegisterPathRequest {
   repeated string stations = 1;
 }
@@ -76,18 +72,19 @@ message RegisterPathResponse {
 
 message PathResponse {
   int32 id = 1;
-  repeated LinkResponse links = 2;
+  repeated StopResponse stops = 2;
 }
 
-message PathList {
-  repeated StationList paths = 1;
+message StopResponse {
+  StationResponse station = 1;
+  double distance = 3;
 }
 
 message GetPathRequest {
   int32 id = 1;
 }
 
-message GetPathsRequest {
-  optional int32 departureStationId = 1;
-  optional int32 arrivalStationId = 2;
+message PathsQueryParams {
+  string departure = 1;
+  string arrival = 2;
 }

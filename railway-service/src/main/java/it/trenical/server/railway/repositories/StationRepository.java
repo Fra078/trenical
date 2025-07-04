@@ -1,94 +1,20 @@
 package it.trenical.server.railway.repositories;
 
-import it.trenical.server.railway.dao.StationDao;
-import it.trenical.server.railway.db.StationDb;
-import it.trenical.server.railway.db.helpers.LinkDatabaseHelper;
-import it.trenical.server.railway.db.helpers.PathDatabaseHelper;
-import it.trenical.server.railway.db.helpers.StationDatabaseHelper;
-import it.trenical.server.railway.models.Path;
+import it.trenical.server.railway.exceptions.StationExistsException;
 import it.trenical.server.railway.models.Station;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
-public class StationRepository implements StationDao {
+public interface StationRepository {
+    void findAll(Consumer<Station> consumer);
+    Optional<Station> get(String name);
+    void save(Station station) throws StationExistsException;
+    boolean delete(String name);
 
-    private final StationDb db = new StationDb();
+    Boolean insertLink(String stationA, String stationB, double distance);
+    boolean removeLink(String stationA, String stationB);
 
-    public StationRepository() {
-        db.withConnection(connection->{
-            StationDatabaseHelper.createTable(connection);
-            LinkDatabaseHelper.createTable(connection);
-            PathDatabaseHelper.createTables(connection);
-        });
-    }
-
-    @Override
-    public Collection<Station> getAll() {
-        return db.withConnection(StationDatabaseHelper::getAll);
-    }
-
-    @Override
-    public Station get(String name) {
-        return db.withConnection(connection->{
-            return StationDatabaseHelper.get(connection, name).orElseThrow();
-        });
-    }
-
-    @Override
-    public boolean create(String name, String city, int trackCount) {
-        return db.withConnection(connection->{
-            return StationDatabaseHelper.create(connection, name, city, trackCount);
-        });
-    }
-
-    @Override
-    public boolean delete(String name) {
-        return db.withConnection(connection->{
-            return StationDatabaseHelper.delete(connection, name);
-        });
-    }
-
-    @Override
-    public boolean insertLink(String stationA, String stationB, double distance) {
-        return db.withConnection(connection->{
-            if (LinkDatabaseHelper.getDistance(connection, stationA, stationB) != null)
-                return false;
-            LinkDatabaseHelper.insertLink(connection, stationA, stationB, distance);
-            return true;
-        });
-    }
-
-    @Override
-    public boolean removeLink(String stationA, String stationB) {
-        return db.withConnection(connection -> {
-            if (LinkDatabaseHelper.getDistance(connection, stationA, stationB) == null)
-                return false;
-            return LinkDatabaseHelper.removeLink(connection, stationA, stationB);
-        });
-    }
-
-    @Override
-    public Map<String, Double> getNeighbours(String station) {
-        return db.withConnection(connection->{
-            return LinkDatabaseHelper.getNeighbours(connection, station);
-        });
-    }
-
-    @Override
-    public Integer registerPath(List<String> stations) {
-        return db.withConnection(connection->{
-            return PathDatabaseHelper.insertPath(connection, stations);
-        });
-    }
-
-    @Override
-    public Path getPath(int id) {
-        return db.withConnection(connection->{
-           return PathDatabaseHelper.getPath(connection, id);
-        });
-    }
+    Map<String, Double> getNeighbours(String station);
 }

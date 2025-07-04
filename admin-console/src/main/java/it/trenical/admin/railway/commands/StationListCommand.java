@@ -7,6 +7,9 @@ import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
 import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.proto.railway.StationList;
+import it.trenical.proto.railway.StationResponse;
+
+import java.util.Iterator;
 
 public class StationListCommand extends Command {
     private final ManagedChannel channel;
@@ -18,7 +21,7 @@ public class StationListCommand extends Command {
     @Override
     protected void action(String[] args) throws BadCommandSyntaxException {
         RailwayServiceGrpc.RailwayServiceBlockingStub stub = RailwayServiceGrpc.newBlockingStub(channel);
-        StationList list = stub.getAllStations(Empty.getDefaultInstance());
-        StationPrinter.printStations(list.getStationsList());
+        Iterator<StationResponse> it = stub.getAllStations(Empty.getDefaultInstance());
+        StationPrinter.printStations(it);
     }
 }

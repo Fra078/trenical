@@ -2,125 +2,115 @@ package it.trenical.server.railway.services;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.railway.*;
-import it.trenical.server.railway.dao.StationDao;
+import it.trenical.server.railway.managers.StationManager;
+import it.trenical.server.railway.repositories.StationRepository;
+import it.trenical.server.railway.managers.PathManager;
 import it.trenical.server.railway.mapper.RailwayMapper;
 import it.trenical.server.railway.models.Path;
 
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
 
-    private final StationDao stationDao;
+    private final StationManager stationManager;
+    private final PathManager pathManager;
 
-    public RailwayService(StationDao stationDao) {
-        this.stationDao = stationDao;
+    public RailwayService(StationManager stationManager, PathManager pathManager) {
+        this.stationManager = stationManager;
+        this.pathManager = pathManager;
     }
 
     @Override
-    public void getAllStations(com.google.protobuf.Empty request, StreamObserver<StationList> responseObserver) {
-        responseObserver.onNext(
-                StationList.newBuilder()
-                        .addAllStations(stationDao.getAll().stream().map(RailwayMapper::toDto).toList())
-                        .build()
-        );
+    public void getAllStations(Empty request, StreamObserver<StationResponse> responseObserver) {
+        stationManager.getAll(responseObserver::onNext);
         responseObserver.onCompleted();
     }
 
     @Override
     public void registerStation(RegisterStationRequest request, StreamObserver<Empty> responseObserver) {
-        if (request.getName().isBlank() || request.getCity().isBlank() || request.getTrackCount() <= 0) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
-            return;
-        }
-        boolean done = stationDao.create(request.getName().trim(), request.getCity().trim(), request.getTrackCount());
-        if (done) {
+        try {
+            stationManager.registerStation(request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.ALREADY_EXISTS.asRuntimeException());
+        } catch (StatusRuntimeException ex){
+            responseObserver.onError(ex);
         }
     }
 
     @Override
     public void getStation(GetStationRequest request, StreamObserver<StationResponse> responseObserver) {
         try {
-            responseObserver.onNext(RailwayMapper.toDto(stationDao.get(request.getName())));
+            responseObserver.onNext(stationManager.getByName(request));
             responseObserver.onCompleted();
-        } catch (NoSuchElementException exc){
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
         }
     }
 
     @Override
     public void deleteStation(DeleteStationRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = stationDao.delete(request.getName());
-        if (done) {
+        try {
+            stationManager.deleteStation(request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
         }
     }
 
     @Override
     public void linkStations(LinkStationsRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = stationDao.insertLink(request.getStation1(), request.getStation2(), request.getDistance());
-        if (done) {
+        try {
+            stationManager.linkStations(request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+        } catch (StatusRuntimeException e){
+            responseObserver.onError(e);
         }
     }
 
     @Override
     public void unLinkStations(UnlinkStationsRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = stationDao.removeLink(request.getStation1(), request.getStation2());
-        if (done) {
+        try {
+            stationManager.unlinkStations(request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+        } catch (StatusRuntimeException e){
+            responseObserver.onError(e);
         }
     }
 
     @Override
     public void getNearStations(GetNearStationsRequest request, StreamObserver<GetNearStationsResponse> responseObserver) {
-        Map<String, Double> result = stationDao.getNeighbours(request.getName());
-        responseObserver.onNext(GetNearStationsResponse.newBuilder()
-                        .putAllValue(result)
-                        .build());
-        responseObserver.onCompleted();
+        try {
+            responseObserver.onNext(stationManager.getNearStations(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException e){
+            responseObserver.onError(e);
+        }
     }
 
     @Override
     public void registerPath(RegisterPathRequest request, StreamObserver<RegisterPathResponse> responseObserver) {
-        List<String> stations = request.getStationsList();
-        if (stations.size() < 2) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
-            return;
+        try {
+            responseObserver.onNext(pathManager.registerPath(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
         }
-        Integer id = stationDao.registerPath(stations);
-        if (id == null) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
-            return;
-        }
-        responseObserver.onNext(RegisterPathResponse.newBuilder().setId(id).build());
-        responseObserver.onCompleted();
     }
 
     @Override
     public void getPath(GetPathRequest request, StreamObserver<PathResponse> responseObserver) {
-        Path path = stationDao.getPath(request.getId());
-        if (path == null) {
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
-            return;
+        try {
+            responseObserver.onNext(pathManager.getPath(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
         }
-        responseObserver.onNext(RailwayMapper.toDto(path));
-        responseObserver.onCompleted();
     }
 }

@@ -4,9 +4,9 @@ import io.grpc.ManagedChannel;
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
 import it.trenical.proto.railway.GetPathRequest;
-import it.trenical.proto.railway.LinkResponse;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.RailwayServiceGrpc;
+import it.trenical.proto.railway.StopResponse;
 
 public class GetPathCommand extends Command {
     private final ManagedChannel channel;
@@ -23,9 +23,8 @@ public class GetPathCommand extends Command {
         PathResponse resp = RailwayServiceGrpc.newBlockingStub(channel).getPath(
                 GetPathRequest.newBuilder().setId(id).build()
         );
-        System.out.println(resp.getId());
-        for (LinkResponse link : resp.getLinksList()) {
-            System.out.printf("%s -> %s : %.2f%n", link.getDeparture().getName(), link.getArrival().getName(), link.getDistance());
+        for (StopResponse stop : resp.getStopsList()) {
+            System.out.printf("%.2f KM -> %s%n",stop.getDistance(), stop.getStation().getName());
         }
     }
 

@@ -2,6 +2,7 @@ package it.trenical.admin.railway.printer;
 
 import it.trenical.proto.railway.StationResponse;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class StationPrinter {
@@ -13,4 +14,12 @@ public class StationPrinter {
             System.out.printf("%-20s %-20s %-2d\n", station.getName(), station.getCity(), station.getPlatformCount());
         });
     }
+    public static void printStations(Iterator<StationResponse> it) {
+        System.out.printf("%-20s %-20s %-2s\n", "Nome", "Citta", "Binari");
+        while (it.hasNext()){
+            StationResponse station = it.next();
+            System.out.printf("%-20s %-20s %-2d\n", station.getName(), station.getCity(), station.getPlatformCount());
+        }
+    }
+
 }

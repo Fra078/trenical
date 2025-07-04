@@ -2,11 +2,12 @@ package it.trenical.trainmanager.managers;
 
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
+import it.trenical.proto.railway.StopResponse;
 import it.trenical.proto.train.RegisterTrainRequest;
 import it.trenical.proto.train.TrainId;
 import it.trenical.proto.train.TrainQueryParameters;
 import it.trenical.proto.train.TrainResponse;
-import it.trenical.trainmanager.client.RailwayClient;
+import it.trenical.trainmanager.clients.grpc.RailwayClient;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
@@ -15,7 +16,6 @@ import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.strategy.PlatformAssignmentStrategy;
-import it.trenical.trainmanager.utilities.Validator;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -40,9 +40,9 @@ public class TrainManager {
     }
 
     public TrainResponse register(RegisterTrainRequest request) {
-        if (Validator.isBlank(request.getName()))
+        if (request.getName().isBlank())
             throw new IllegalArgumentException("Name cannot be empty");
-        if (!Validator.isFuture(request.getDepartureTime()))
+        if (request.getDepartureTime() <= System.currentTimeMillis())
             throw new IllegalArgumentException("Departure time must be in the future");
 
         TrainEntity.Builder builder = TrainEntity.builder()
@@ -60,9 +60,8 @@ public class TrainManager {
             throw new IllegalArgumentException("PathId not valid");
         builder.setPathId(path.getId());
 
-        Map<String, Integer> stationPlatformLimits = path.getLinksList().stream()
-                .flatMap(link->Stream.of(link.getDeparture(), link.getArrival()))
-                .distinct()
+        Map<String, Integer> stationPlatformLimits = path.getStopsList().stream()
+                .map(StopResponse::getStation)
                 .collect(Collectors.toMap(StationResponse::getName, StationResponse::getPlatformCount));
 
         Map<String, Integer> finalPlatformChoices =

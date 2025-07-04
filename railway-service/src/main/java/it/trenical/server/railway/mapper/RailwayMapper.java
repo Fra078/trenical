@@ -1,10 +1,8 @@
 package it.trenical.server.railway.mapper;
 
-import it.trenical.proto.railway.LinkResponse;
 import it.trenical.proto.railway.PathResponse;
-import it.trenical.proto.railway.StationList;
 import it.trenical.proto.railway.StationResponse;
-import it.trenical.server.railway.models.Link;
+import it.trenical.proto.railway.StopResponse;
 import it.trenical.server.railway.models.Path;
 import it.trenical.server.railway.models.Station;
 
@@ -21,16 +19,14 @@ public class RailwayMapper {
 
     public static PathResponse toDto(Path path) {
         return PathResponse.newBuilder()
-                .setId(path.id())
-                .addAllLinks(path.links().stream().map(RailwayMapper::toDto).toList())
-                .build();
-    }
-
-    public static LinkResponse toDto(Link link) {
-        return LinkResponse.newBuilder()
-                .setArrival(toDto(link.arrival()))
-                .setDeparture(toDto(link.departure()))
-                .setDistance(link.distance())
+                .setId(path.getId())
+                .addAllStops(
+                        path.getStops().stream().map(item ->
+                                StopResponse.newBuilder()
+                                        .setStation(toDto(item.getStation()))
+                                        .setDistance(item.getDistance())
+                                        .build()
+                        ).toList())
                 .build();
     }
 }

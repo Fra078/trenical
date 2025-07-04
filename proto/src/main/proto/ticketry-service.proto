@@ -1,0 +1,22 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "railway-service.proto";
+option java_multiple_files = true;
+
+package it.trenical.ticketry.proto;
+
+service TicketryService {
+  rpc GetTripSolutions(TripQueryParams) returns (stream TripSolution);
+}
+
+message TripSolution {
+
+}
+
+message TripQueryParams {
+  string departure = 1;
+  string arrival = 2;
+  int64 dayTime = 3;
+  optional string serviceClass = 4;
+  optional string trainType = 5;
+}
