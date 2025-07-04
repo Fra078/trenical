@@ -4,6 +4,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import it.trenical.server.database.DatabaseManager;
 import it.trenical.user.managers.LoginManager;
+import it.trenical.user.managers.UserManager;
 import it.trenical.user.password.PasswordHashManager;
 import it.trenical.user.password.PlainPasswordStrategy;
 import it.trenical.user.repository.UserRepository;
@@ -18,8 +19,9 @@ public class UserServer {
         DatabaseManager db = new DatabaseManager("./user-db");
         UserRepository userRepository = new UserJdbcRepository(db);
         LoginManager loginManager = new LoginManager(userRepository, setupPasswordHashManager());
+        UserManager userManager = new UserManager(userRepository);
         Server server =ServerBuilder.forPort(5060)
-                .addService(new UserServiceImpl(loginManager))
+                .addService(new UserServiceImpl(loginManager, userManager))
                 .build().start();
         System.out.println("Server started");
         server.awaitTermination();

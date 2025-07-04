@@ -1,6 +1,7 @@
 package it.trenical.user.repository.jdbc;
 
 import it.trenical.server.database.DatabaseManager;
+import it.trenical.user.exceptions.UserAlreadyExistsException;
 import it.trenical.user.models.User;
 import it.trenical.user.repository.UserRepository;
 
@@ -17,10 +18,14 @@ public class UserJdbcRepository implements UserRepository {
     }
 
     @Override
-    public void save(User user) {
-        db.withConnection(connection -> {
+    public void save(User user) throws UserAlreadyExistsException {
+        try(Connection connection = db.getConnection()){
             insertUser(connection, user);
-        });
+        } catch (SQLException exception) {
+            if (exception.getErrorCode() == 23505)
+                throw new UserAlreadyExistsException(user.username());
+            throw new RuntimeException(exception);
+        }
     }
 
     @Override
@@ -38,8 +43,7 @@ public class UserJdbcRepository implements UserRepository {
             ps.setString(3, user.firstName());
             ps.setString(4, user.lastName());
             ps.setString(5, user.type().name());
-            if (ps.executeUpdate() <= 0)
-                throw new SQLException("Unable to insert user");
+            ps.executeUpdate();
         }
     }
 
