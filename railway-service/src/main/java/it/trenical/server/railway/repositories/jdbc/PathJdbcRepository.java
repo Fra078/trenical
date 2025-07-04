@@ -8,9 +8,8 @@ import it.trenical.server.railway.repositories.PathRepository;
 import it.trenical.server.railway.repositories.StationRepository;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class PathJdbcRepository implements PathRepository {
 
@@ -37,6 +36,47 @@ public class PathJdbcRepository implements PathRepository {
     public Optional<Path> getPath(int pathId) {
         return db.withConnection(connection -> {
             return getPath(connection, pathId);
+        });
+    }
+
+    @Override
+    public void findAll(Consumer<Path> consumer) {
+        String sql = "SELECT id FROM Path";
+        db.withConnection(connection -> {
+            List<Integer> ids = new ArrayList<>();
+            try(PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    ids.add(rs.getInt(1));
+            }
+            for (Integer id : ids)
+                getPath(connection, id).ifPresent(consumer);
+        });
+    }
+
+    @Override
+    public void findBySubpath(String stationA, String stationB, Consumer<Path> consumer) {
+        String sql = """
+                     SELECT s1.PATH_ID
+                     FROM Stop s1, Stop s2
+                     WHERE s1.PATH_ID = s2.PATH_ID AND
+                           s1.STATION = ? AND
+                           s2.STATION = ? AND
+                           s1.STOP_INDEX < s2.STOP_INDEX;
+                     
+                     """;
+        db.withConnection(connection -> {
+            Set<Integer> ids = new HashSet<>();
+            try(PreparedStatement ps = connection.prepareStatement(sql);) {
+                ps.setString(1, stationA);
+                ps.setString(2, stationB);
+                try(ResultSet rs = ps.executeQuery()) {
+                    while (rs.next())
+                        ids.add(rs.getInt(1));
+                }
+            }
+            for (Integer id : ids)
+                getPath(connection, id).ifPresent(consumer);
         });
     }
 

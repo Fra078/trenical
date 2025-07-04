@@ -113,4 +113,16 @@ public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
             responseObserver.onError(exc);
         }
     }
+
+    @Override
+    public void getAllPaths(Empty request, StreamObserver<PathResponse> responseObserver) {
+        responseObserver.onNext(pathManager.getAll());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getPaths(PathsQueryParams request, StreamObserver<PathResponse> responseObserver) {
+        responseObserver.onNext(pathManager.queryBySubpath(request));
+        responseObserver.onCompleted();
+    }
 }
