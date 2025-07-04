@@ -7,6 +7,8 @@ import io.jsonwebtoken.security.Keys;
 import it.trenical.server.jwt.JwtUtils;
 import it.trenical.user.mapper.UserMapper;
 import it.trenical.user.models.User;
+import it.trenical.user.password.HashPasswordStrategy;
+import it.trenical.user.password.PasswordHashManager;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SigninRequest;
 import it.trenical.user.proto.SignupRequest;
@@ -14,19 +16,23 @@ import it.trenical.user.repository.UserRepository;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public class LoginManager {
 
     private static final long EXPIRATION_TIME = 900_000;
     private final UserRepository userRepository;
+    private final PasswordHashManager passwordManager;
 
-    public LoginManager(UserRepository userRepository) {
+    public LoginManager(UserRepository userRepository, PasswordHashManager passwordManager) {
         this.userRepository = userRepository;
+        this.passwordManager = passwordManager;
     }
 
     public LoginResponse register(SignupRequest request) {
-        User user = UserMapper.fromSignupRequest(request);
+        User user = UserMapper.fromSignupRequest(
+                request, passwordManager.getHash(request.getPassword()));
         try {
             userRepository.save(user);
             return UserMapper.toLoginResponse(user, generateJwtFromUser(user));
@@ -42,7 +48,7 @@ public class LoginManager {
     public LoginResponse login(SigninRequest request) {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(
                 () -> Status.UNAUTHENTICATED.withDescription("Username does not exists!").asRuntimeException());
-        if (request.getPassword().equals(user.passwordHash())) {
+        if (passwordManager.verify(request.getPassword(), user.passwordHash())) {
             return UserMapper.toLoginResponse(user, generateJwtFromUser(user));
         }
         throw Status.UNAUTHENTICATED.withDescription("Wrong password!").asRuntimeException();

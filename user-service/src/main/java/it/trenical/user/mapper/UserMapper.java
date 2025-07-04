@@ -10,9 +10,10 @@ public class UserMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    public static User fromSignupRequest(SignupRequest request){
+    public static User fromSignupRequest(SignupRequest request, String passwordHash){
         return User.builder()
                 .setUsername(request.getUsername())
+                .setPasswordHash(passwordHash)
                 .setFirstName(request.getFirstName())
                 .setLastName(request.getLastName())
                 .setType(User.Type.STANDARD)
