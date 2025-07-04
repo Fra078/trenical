@@ -3,6 +3,7 @@ package it.trenical.user.mapper;
 import it.trenical.user.models.User;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SignupRequest;
+import it.trenical.user.proto.UserResponse;
 import it.trenical.user.proto.UserType;
 
 public class UserMapper {
@@ -23,6 +24,15 @@ public class UserMapper {
     public static LoginResponse toLoginResponse(User user, String token){
         return LoginResponse.newBuilder()
                 .setJwt(token)
+                .setFirstName(user.firstName())
+                .setLastName(user.lastName())
+                .setUsername(user.username())
+                .setType(toDto(user.type()))
+                .build();
+    }
+
+    public static UserResponse toUserResponse(User user){
+        return UserResponse.newBuilder()
                 .setFirstName(user.firstName())
                 .setLastName(user.lastName())
                 .setUsername(user.username())

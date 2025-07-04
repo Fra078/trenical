@@ -7,6 +7,18 @@ package it.trenical.user.proto;
 service UserService {
   rpc Register(SignupRequest) returns (LoginResponse);
   rpc Login(SigninRequest) returns (LoginResponse);
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+}
+
+message GetUserRequest {
+  string username = 1;
+}
+
+message UserResponse {
+  string username = 2;
+  string firstName = 3;
+  string lastName = 4;
+  UserType type = 5;
 }
 
 message SignupRequest {

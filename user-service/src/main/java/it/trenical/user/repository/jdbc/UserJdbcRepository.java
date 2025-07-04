@@ -31,7 +31,7 @@ public class UserJdbcRepository implements UserRepository {
     }
 
     private void insertUser(Connection connection, User user) throws SQLException {
-        String sql = "INSERT INTO User (username,passwordHash,firstName,lastName,type) VALUES (?, ?, ?, ?,?)";
+        String sql = "INSERT INTO UserEntity (username,passwordHash,firstName,lastName,type) VALUES (?, ?, ?, ?,?)";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.username());
             ps.setString(2, user.passwordHash());
@@ -44,7 +44,7 @@ public class UserJdbcRepository implements UserRepository {
     }
 
     private User getByUsername(Connection connection, String username) throws SQLException {
-        String sql = "SELECT * FROM User WHERE username = ?";
+        String sql = "SELECT * FROM UserEntity WHERE username = ?";
         try(PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, username);
             try(ResultSet rs = stmt.executeQuery()){
@@ -67,12 +67,12 @@ public class UserJdbcRepository implements UserRepository {
 
     private void createTable(Connection connection) throws SQLException {
         String sql = """
-                CREATE TABLE IF NOT EXISTS User (
+                CREATE TABLE IF NOT EXISTS UserEntity (
                     username VARCHAR(255) PRIMARY KEY NOT NULL,
                     passwordHash VARCHAR(255) NOT NULL,
                     firstName VARCHAR(255) NOT NULL,
                     lastName VARCHAR(255) NOT NULL,
-                    type VARCHAR(255) NOT NULL,
+                    type VARCHAR(255) NOT NULL
                 );
                 """;
         try(PreparedStatement stmt = connection.prepareStatement(sql)) {

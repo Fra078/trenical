@@ -1,6 +1,7 @@
 package it.trenical.user.managers;
 
 import io.grpc.Status;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -58,6 +59,7 @@ public class LoginManager {
     private String generateJwtFromUser(User user) {
         return Jwts.builder()
                 .setSubject(user.username())
+                .setIssuer("TrenicalSystem")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(Keys.hmacShaKeyFor(JwtUtils.SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
