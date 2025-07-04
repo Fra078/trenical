@@ -1,4 +1,4 @@
-package it.trenical.trainmanager.client;
+package it.trenical.ticketry.clients.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -7,9 +7,12 @@ import io.grpc.StatusRuntimeException;
 import it.trenical.proto.railway.GetPathRequest;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.RailwayServiceGrpc;
+import it.trenical.ticketry.clients.RailwayClient;
 
-public final class RailwayClient {
-    private static RailwayClient instance;
+import java.util.List;
+
+public final class RailwayGrpcClient implements RailwayClient {
+    private static RailwayGrpcClient instance;
     private final ManagedChannel channel = ManagedChannelBuilder
             .forAddress("localhost", 5050)
             .usePlaintext()
@@ -17,21 +20,17 @@ public final class RailwayClient {
     private final RailwayServiceGrpc.RailwayServiceBlockingStub stub
             = RailwayServiceGrpc.newBlockingStub(channel);
 
-    private RailwayClient() {}
+    private RailwayGrpcClient() {}
 
-    public PathResponse getPath(int pathId) {
-        try {
-            return stub.getPath(GetPathRequest.newBuilder().setId(pathId).build());
-        } catch (StatusRuntimeException e) {
-            if (e.getStatus().getCode() == Status.Code.NOT_FOUND)
-                return null;
-            else throw e;
-        }
+    @Override
+    public List<Integer> findPaths(String start, String end) {
+        stub.getAllPaths()
+        return List.of();
     }
 
-    public static synchronized RailwayClient getInstance() {
+    public static synchronized RailwayGrpcClient getInstance() {
         if (instance == null)
-            instance = new RailwayClient();
+            instance = new RailwayGrpcClient();
         return instance;
     }
 
