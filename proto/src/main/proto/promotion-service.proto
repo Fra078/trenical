@@ -1,0 +1,96 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option java_multiple_files = true;
+option java_package = "it.trenical.promotion.proto";
+
+service PromotionService {
+  rpc RegisterPromotion(Promotion) returns (google.protobuf.Empty);
+  rpc GetAllPromotions(GetAllPromotionsRequest) returns (stream Promotion);
+  rpc UpdatePromotionState(UpdatePromotionRequest) returns (google.protobuf.Empty);
+}
+
+message GetAllPromotionsRequest {
+  bool showDisabled = 1;
+}
+
+message UpdatePromotionRequest {
+  string id = 1;
+  bool enable = 2;
+}
+
+message Promotion {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated PromotionCondition conditions = 4;
+
+  oneof effect_type {
+    PercentageDiscountEffect percentage_discount = 5;
+    FixedAmountDiscountEffect fixed_amount_discount = 6;
+    FixedPriceEffect fixed_price = 7;
+    CountTicketDiscountEffect count_ticket_discount = 8;
+  }
+}
+
+message PercentageDiscountEffect {
+  int32 percentage = 1;
+}
+
+message FixedAmountDiscountEffect {
+  double amount = 1;
+}
+
+message FixedPriceEffect {
+  double price = 1;
+}
+
+message CountTicketDiscountEffect {
+  int32 count = 1;
+  int32 discount_percentage = 2;
+}
+
+
+message PromotionCondition {
+  oneof condition_type {
+    TravelPathCondition path = 1;
+    TravelPeriodCondition period = 2;
+    FidelityCustomerCondition fidelity = 3;
+    TrainTypeCondition train_type = 4;
+    DayOfWeekCondition day_of_week = 5;
+    MinTicketsCondition min_tickets = 6;
+  }
+}
+
+message TravelPathCondition {
+  int32 pathId = 1;
+}
+
+message TravelPeriodCondition {
+  int64 start_date = 1;
+  int64 end_date = 2;
+}
+
+message FidelityCustomerCondition {}
+
+message TrainTypeCondition {
+  string type_name = 1;
+}
+
+enum DayOfWeek {
+  MONDAY = 0;
+  TUESDAY = 1;
+  WEDNESDAY = 2;
+  THURSDAY = 3;
+  FRIDAY = 4;
+  SATURDAY = 5;
+  SUNDAY = 6;
+}
+
+message DayOfWeekCondition {
+  repeated DayOfWeek day = 1;
+}
+
+message MinTicketsCondition {
+  int32 quantity = 1;
+}

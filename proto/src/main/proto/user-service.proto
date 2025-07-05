@@ -1,8 +1,8 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
 option java_multiple_files = true;
-
-package it.trenical.user.proto;
+option java_package="it.trenical.user.proto";
+package user;
 
 service UserService {
   rpc Register(SignupRequest) returns (LoginResponse);
