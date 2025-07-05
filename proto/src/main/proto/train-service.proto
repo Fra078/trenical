@@ -1,9 +1,10 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
+import "common.proto";
 import "railway-service.proto";
 option java_multiple_files = true;
 
-package it.trenical.proto.train;
+option java_package = "it.trenical.proto.train";
 
 
 service TrainManager {
@@ -76,13 +77,16 @@ message TrainResponse {
   map<string, int32> platformChoices = 7;
 }
 
-message DateRange {
-  int64 from = 1;
-  int64 to = 2;
+message StationPair {
+  string departure = 1;
+  string arrival = 2;
 }
 
 message TrainQueryParameters {
-  optional int32 pathId = 1;
+  oneof pathFilter {
+    int32 pathId = 1;
+    StationPair stations = 10;
+  }
   optional string type = 2;
   optional string serviceClass = 3;
   optional DateRange dateRange= 4;

@@ -3,6 +3,7 @@ package it.trenical.admin.train.commands.train;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import it.trenical.admin.train.creator.printers.TrainPrinter;
+import it.trenical.common.proto.Common;
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
 import it.trenical.proto.train.*;
@@ -38,7 +39,7 @@ public class ListTrainCommand extends Command {
 
                     ZonedDateTime startOfDay = date.atStartOfDay(ZoneId.systemDefault());
                     ZonedDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-                    builder.setDateRange(DateRange.newBuilder()
+                    builder.setDateRange(Common.DateRange.newBuilder()
                             .setFrom(startOfDay.toEpochSecond())
                             .setTo(endOfDay.toEpochSecond())
                             .build());

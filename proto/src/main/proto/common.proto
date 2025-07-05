@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "it.trenical.common.proto";
+
+
+message DateRange {
+  int64 from = 1;
+  int64 to = 2;
+}
