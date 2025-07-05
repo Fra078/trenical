@@ -26,6 +26,7 @@ public class RailwayServer {
                 .addService(new RailwayService(stationManager, pathManager))
                 .build()
                 .start();
+        System.out.println("Server started on port " + server.getPort());
         server.awaitTermination();
     }
 }

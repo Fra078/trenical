@@ -23,7 +23,7 @@ public class UserServer {
         Server server =ServerBuilder.forPort(5060)
                 .addService(new UserServiceImpl(loginManager, userManager))
                 .build().start();
-        System.out.println("Server started");
+        System.out.println("Server started on port " + server.getPort());
         server.awaitTermination();
     }
 

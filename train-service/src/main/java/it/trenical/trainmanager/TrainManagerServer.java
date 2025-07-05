@@ -3,7 +3,7 @@ package it.trenical.trainmanager;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import it.trenical.server.database.DatabaseManager;
-import it.trenical.trainmanager.clients.grpc.RailwayClient;
+import it.trenical.trainmanager.clients.grpc.RailwayGrpcClient;
 import it.trenical.trainmanager.managers.TrainManager;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
@@ -24,7 +24,7 @@ public class TrainManagerServer {
         ServiceClassRepository serviceClassRepository = new ServiceClassJdbcRepository(db);
         TrainRepository trainRepository = new TrainJdbcRepository(db);
 
-        RailwayClient railwayClient = RailwayClient.getInstance();
+        RailwayGrpcClient railwayClient = RailwayGrpcClient.getInstance();
         TrainManager trainManager = new TrainManager(
                 trainRepository,
                 typeRepository,
@@ -37,6 +37,8 @@ public class TrainManagerServer {
                 .addService(new TrainManagerService(trainManager, serviceClassRepository, typeRepository))
                 .build()
                 .start();
+
+        System.out.println("Server started on port " + server.getPort());
         server.awaitTermination();
     }
 
