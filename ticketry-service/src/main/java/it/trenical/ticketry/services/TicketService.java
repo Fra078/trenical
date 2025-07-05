@@ -1,18 +1,23 @@
 package it.trenical.ticketry.services;
 
 import io.grpc.stub.StreamObserver;
+import it.trenical.ticketry.clients.RailwayClient;
+import it.trenical.ticketry.managers.TripManager;
 import it.trenical.ticketry.proto.TicketryServiceGrpc;
 import it.trenical.ticketry.proto.TripQueryParams;
 import it.trenical.ticketry.proto.TripSolution;
 
 public class TicketService extends TicketryServiceGrpc.TicketryServiceImplBase {
 
-    public TicketService() {
+    private final TripManager tripManager;
 
+    public TicketService(TripManager tripManager) {
+        this.tripManager = tripManager;
     }
 
     @Override
     public void getTripSolutions(TripQueryParams request, StreamObserver<TripSolution> responseObserver) {
-
+        tripManager.getTripSolutions(request, responseObserver::onNext);
+        responseObserver.onCompleted();
     }
 }

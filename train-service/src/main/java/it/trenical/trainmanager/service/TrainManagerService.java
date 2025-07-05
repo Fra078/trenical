@@ -135,6 +135,7 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
     @Override
     public void getAllTrains(TrainQueryParameters request, StreamObserver<TrainResponse> responseObserver) {
         try {
+            System.out.println("Received allREQ " + request.toString());
             trainManager.getAll(request, responseObserver::onNext);
             responseObserver.onCompleted();
         } catch (RuntimeException e) {

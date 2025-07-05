@@ -3,25 +3,24 @@ package it.trenical.trainmanager.managers;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
 import it.trenical.proto.railway.StopResponse;
-import it.trenical.proto.train.RegisterTrainRequest;
-import it.trenical.proto.train.TrainId;
-import it.trenical.proto.train.TrainQueryParameters;
-import it.trenical.proto.train.TrainResponse;
-import it.trenical.trainmanager.clients.grpc.RailwayClient;
+import it.trenical.proto.train.*;
+import it.trenical.trainmanager.clients.RailwayClient;
+import it.trenical.trainmanager.clients.grpc.RailwayGrpcClient;
 import it.trenical.trainmanager.mapper.TrainMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainEntity;
+import it.trenical.trainmanager.models.TrainQueryParams;
 import it.trenical.trainmanager.models.TrainType;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 import it.trenical.trainmanager.strategy.PlatformAssignmentStrategy;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TrainManager {
 
@@ -31,7 +30,7 @@ public class TrainManager {
     private final RailwayClient railClient;
     private final PlatformAssignmentStrategy paStrategy;
 
-    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassRepository classRepository, RailwayClient railClient, PlatformAssignmentStrategy paStrategy) {
+    public TrainManager(TrainRepository trainRepository, TrainTypeRepository typeRepository, ServiceClassRepository classRepository, RailwayGrpcClient railClient, PlatformAssignmentStrategy paStrategy) {
         this.trainRepository = trainRepository;
         this.typeRepository = typeRepository;
         this.classRepository = classRepository;
@@ -42,7 +41,7 @@ public class TrainManager {
     public TrainResponse register(RegisterTrainRequest request) {
         if (request.getName().isBlank())
             throw new IllegalArgumentException("Name cannot be empty");
-        if (request.getDepartureTime() <= System.currentTimeMillis())
+        if (request.getDepartureTime() <= Instant.now().getEpochSecond())
             throw new IllegalArgumentException("Departure time must be in the future");
 
         TrainEntity.Builder builder = TrainEntity.builder()
@@ -84,11 +83,26 @@ public class TrainManager {
     }
 
     public void getAll(TrainQueryParameters params, Consumer<TrainResponse> consumer){
-        trainRepository.findAll(TrainMapper.fromDto(params), entity->{
-            TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
-            PathResponse path = railClient.getPath(entity.pathId());
-            consumer.accept(TrainMapper.toDto(entity, type, path));
-        });
+        if (params.hasStations()){
+            StationPair pair = params.getStations();
+            railClient.findPaths(pair.getDeparture(), pair.getArrival(), (path) -> {
+                TrainQueryParameters newParams = TrainQueryParameters.newBuilder(params)
+                        .setPathId(path.getId())
+                        .build();
+
+                trainRepository.findAll(TrainMapper.fromDto(newParams), entity->{
+                    TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
+                    consumer.accept(TrainMapper.toDto(entity, type, path));
+                });
+            });
+        } else {
+            trainRepository.findAll(TrainMapper.fromDto(params), entity->{
+                TrainType type = typeRepository.findByName(entity.type()).orElseThrow();
+                PathResponse path = railClient.getPath(entity.pathId());
+                consumer.accept(TrainMapper.toDto(entity, type, path));
+            });
+
+        }
     }
 
     private Map<ServiceClassModel, Integer> getAndValidateClassSeats(Map<String, Integer> seats) {

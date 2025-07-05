@@ -1,18 +1,11 @@
 package it.trenical.server.railway.services;
 
 import com.google.protobuf.Empty;
-import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.railway.*;
 import it.trenical.server.railway.managers.StationManager;
-import it.trenical.server.railway.repositories.StationRepository;
 import it.trenical.server.railway.managers.PathManager;
-import it.trenical.server.railway.mapper.RailwayMapper;
-import it.trenical.server.railway.models.Path;
-
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
 
@@ -116,13 +109,13 @@ public class RailwayService extends RailwayServiceGrpc.RailwayServiceImplBase {
 
     @Override
     public void getAllPaths(Empty request, StreamObserver<PathResponse> responseObserver) {
-        responseObserver.onNext(pathManager.getAll());
+        pathManager.findAll(responseObserver::onNext);
         responseObserver.onCompleted();
     }
 
     @Override
     public void getPaths(PathsQueryParams request, StreamObserver<PathResponse> responseObserver) {
-        responseObserver.onNext(pathManager.queryBySubpath(request));
+        pathManager.findBySubpath(request, responseObserver::onNext);
         responseObserver.onCompleted();
     }
 }

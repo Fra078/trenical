@@ -2,14 +2,15 @@ package it.trenical.ticketry.clients.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import it.trenical.proto.railway.GetPathRequest;
 import it.trenical.proto.railway.PathResponse;
+import it.trenical.proto.railway.PathsQueryParams;
 import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.ticketry.clients.RailwayClient;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class RailwayGrpcClient implements RailwayClient {
     private static RailwayGrpcClient instance;
@@ -23,9 +24,10 @@ public final class RailwayGrpcClient implements RailwayClient {
     private RailwayGrpcClient() {}
 
     @Override
-    public List<Integer> findPaths(String start, String end) {
-        stub.getAllPaths()
-        return List.of();
+    public void findPaths(String start, String end, Consumer<PathResponse> consumer) {
+        Iterator<PathResponse> it = stub.getPaths(PathsQueryParams.newBuilder().setDeparture(start).setArrival(end).build());
+        while (it.hasNext())
+            consumer.accept(it.next());
     }
 
     public static synchronized RailwayGrpcClient getInstance() {
