@@ -2,10 +2,10 @@ package it.trenical.promotion.services;
 
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
-import it.trenical.proto.railway.GetAllPromotionsRequest;
-import it.trenical.proto.railway.Promotion;
-import it.trenical.proto.railway.PromotionServiceGrpc;
-import it.trenical.proto.railway.UpdatePromotionRequest;
+import it.trenical.promotion.proto.GetAllPromotionsRequest;
+import it.trenical.promotion.proto.Promotion;
+import it.trenical.promotion.proto.PromotionServiceGrpc;
+import it.trenical.promotion.proto.UpdatePromotionRequest;
 
 public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplBase {
 
