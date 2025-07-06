@@ -1,21 +1,28 @@
 package it.trenical.promotion.services;
 
 import com.google.protobuf.Empty;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import it.trenical.promotion.proto.GetAllPromotionsRequest;
-import it.trenical.promotion.proto.Promotion;
-import it.trenical.promotion.proto.PromotionServiceGrpc;
-import it.trenical.promotion.proto.UpdatePromotionRequest;
+import it.trenical.promotion.managers.PromotionManager;
+import it.trenical.promotion.proto.*;
 
 public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplBase {
 
-    public PromotionService(){
+    private final PromotionManager manager;
 
+    public PromotionService(PromotionManager manager) {
+        this.manager = manager;
     }
 
     @Override
-    public void registerPromotion(Promotion request, StreamObserver<Empty> responseObserver) {
-        super.registerPromotion(request, responseObserver);
+    public void registerPromotion(PromotionMessage request, StreamObserver<Empty> responseObserver) {
+        try {
+            manager.registerPromotion(request);
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
+        }
     }
 
     @Override
@@ -24,7 +31,18 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
-    public void getAllPromotions(GetAllPromotionsRequest request, StreamObserver<Promotion> responseObserver) {
-        super.getAllPromotions(request, responseObserver);
+    public void getAllPromotions(GetAllPromotionsRequest request, StreamObserver<PromotionMessage> responseObserver) {
+        manager.findAllPromotions(responseObserver::onNext);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getPromotionById(GetPromotionRequest request, StreamObserver<PromotionMessage> responseObserver) {
+        try {
+            responseObserver.onNext(manager.findById(request));
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException exc){
+            responseObserver.onError(exc);
+        }
     }
 }

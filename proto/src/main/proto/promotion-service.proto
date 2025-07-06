@@ -5,13 +5,18 @@ option java_multiple_files = true;
 option java_package = "it.trenical.promotion.proto";
 
 service PromotionService {
-  rpc RegisterPromotion(Promotion) returns (google.protobuf.Empty);
-  rpc GetAllPromotions(GetAllPromotionsRequest) returns (stream Promotion);
+  rpc RegisterPromotion(PromotionMessage) returns (google.protobuf.Empty);
+  rpc GetAllPromotions(GetAllPromotionsRequest) returns (stream PromotionMessage);
   rpc UpdatePromotionState(UpdatePromotionRequest) returns (google.protobuf.Empty);
+  rpc GetPromotionById(GetPromotionRequest) returns (PromotionMessage);
 }
 
 message GetAllPromotionsRequest {
   bool showDisabled = 1;
+}
+
+message GetPromotionRequest {
+  string id = 1;
 }
 
 message UpdatePromotionRequest {
@@ -19,16 +24,19 @@ message UpdatePromotionRequest {
   bool enable = 2;
 }
 
-message Promotion {
+message PromotionMessage {
   string id = 1;
   string name = 2;
   string description = 3;
   repeated PromotionCondition conditions = 4;
+  PromotionEffect effect = 5;
+}
 
-  oneof effect_type {
+message PromotionEffect {
+  oneof type {
     PercentageDiscountEffect percentage_discount = 5;
     FixedAmountDiscountEffect fixed_amount_discount = 6;
-    FixedPriceEffect fixed_price = 7;
+    FixedPriceDiscountEffect fixed_price = 7;
     CountTicketDiscountEffect count_ticket_discount = 8;
   }
 }
@@ -41,7 +49,7 @@ message FixedAmountDiscountEffect {
   double amount = 1;
 }
 
-message FixedPriceEffect {
+message FixedPriceDiscountEffect {
   double price = 1;
 }
 
