@@ -6,4 +6,5 @@ public interface Condition extends Serializable {
 
     boolean canApply(TravelContext travelCtx);
 
+    <T> T accept(ConditionVisitor<T> visitor);
 }

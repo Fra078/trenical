@@ -1,6 +1,7 @@
 package it.trenical.promotion.models.conditions;
 
 import it.trenical.promotion.models.Condition;
+import it.trenical.promotion.models.ConditionVisitor;
 import it.trenical.promotion.models.TravelContext;
 
 import java.time.DayOfWeek;
@@ -14,6 +15,15 @@ public class DayOfWeekCondition implements Condition {
 
     public DayOfWeekCondition(Set<DayOfWeek> acceptableDays) {
         this.acceptableDays = Set.copyOf(acceptableDays);
+    }
+
+    public Set<DayOfWeek> getAcceptableDays() {
+        return acceptableDays;
+    }
+
+    @Override
+    public <T> T accept(ConditionVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

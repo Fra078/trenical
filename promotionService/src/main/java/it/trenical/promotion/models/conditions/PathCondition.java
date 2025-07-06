@@ -1,6 +1,7 @@
 package it.trenical.promotion.models.conditions;
 
 import it.trenical.promotion.models.Condition;
+import it.trenical.promotion.models.ConditionVisitor;
 import it.trenical.promotion.models.TravelContext;
 
 public class PathCondition implements Condition {
@@ -10,5 +11,14 @@ public class PathCondition implements Condition {
     @Override
     public boolean canApply(TravelContext travelCtx) {
         return travelCtx.pathId() == this.pathId;
+    }
+
+    public int getPathId() {
+        return pathId;
+    }
+
+    @Override
+    public <T> T accept(ConditionVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }
