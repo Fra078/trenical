@@ -1,0 +1,48 @@
+syntax="proto3";
+option java_package = "it.trenical.promotion.proto";
+option java_multiple_files = true;
+package promotion;
+
+message PromotionCondition {
+  oneof condition_type {
+    TravelPathCondition path = 1;
+    TravelPeriodCondition period = 2;
+    FidelityCustomerCondition fidelity = 3;
+    TrainTypeCondition train_type = 4;
+    DayOfWeekCondition day_of_week = 5;
+    MinTicketsCondition min_tickets = 6;
+  }
+}
+
+message TravelPathCondition {
+  int32 pathId = 1;
+}
+
+message TravelPeriodCondition {
+  int64 start_date = 1;
+  int64 end_date = 2;
+}
+
+message FidelityCustomerCondition {}
+
+message TrainTypeCondition {
+  string type_name = 1;
+}
+
+enum DayOfWeek {
+  MONDAY = 0;
+  TUESDAY = 1;
+  WEDNESDAY = 2;
+  THURSDAY = 3;
+  FRIDAY = 4;
+  SATURDAY = 5;
+  SUNDAY = 6;
+}
+
+message DayOfWeekCondition {
+  repeated DayOfWeek day = 1;
+}
+
+message MinTicketsCondition {
+  int32 quantity = 1;
+}

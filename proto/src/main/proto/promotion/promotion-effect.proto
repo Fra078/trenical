@@ -1,0 +1,30 @@
+syntax="proto3";
+option java_package = "it.trenical.promotion.proto";
+option java_multiple_files = true;
+package promotion;
+
+message PromotionEffect {
+  oneof type {
+    PercentageDiscountEffect percentage_discount = 5;
+    FixedAmountDiscountEffect fixed_amount_discount = 6;
+    FixedPriceDiscountEffect fixed_price = 7;
+    CountTicketDiscountEffect count_ticket_discount = 8;
+  }
+}
+
+message PercentageDiscountEffect {
+  int32 percentage = 1;
+}
+
+message FixedAmountDiscountEffect {
+  double amount = 1;
+}
+
+message FixedPriceDiscountEffect {
+  double price = 1;
+}
+
+message CountTicketDiscountEffect {
+  int32 count = 1;
+  int32 discount_percentage = 2;
+}

@@ -1,0 +1,12 @@
+syntax="proto3";
+
+option java_multiple_files = true;
+option java_package = "it.trenical.proto.train";
+
+package train;
+
+message TrainTypeResponse {
+  string name = 1;
+  double speed = 3;
+  double costPerKm = 4;
+}

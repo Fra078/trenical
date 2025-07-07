@@ -1,0 +1,25 @@
+syntax = "proto3";
+import "train/train-type.proto";
+import "train/service-class.proto";
+option java_package = "it.trenical.promotion.proto";
+option java_multiple_files = true;
+package promotion;
+
+message TravelContextMessage {
+
+  message RouteInfo {
+    int32 pathId = 1;
+    int64 departureTime = 2;
+    string departureStation = 3;
+    int64 arrivalTime = 4;
+    string arrivalStation = 5;
+    double distance = 6;
+  }
+
+  int32 trainId = 1;
+  string trainName = 2;
+  train.TrainTypeResponse trainType = 3;
+  RouteInfo routeInfo = 4;
+  int32 ticketCount = 5;
+  repeated train.ServiceClass classes = 6;
+}

@@ -1,0 +1,24 @@
+syntax="proto3";
+import "train/train-type.proto";
+import "train/service-class.proto";
+option java_multiple_files = true;
+option java_package = "it.trenical.travel.proto";
+
+package travel;
+
+message TravelSolution {
+
+  message Mode {
+    train.ServiceClass serviceClass = 1;
+    double totalPrice = 2;
+  }
+
+  int32 trainId = 1;
+  string trainName = 2;
+  train.TrainTypeResponse type = 3;
+  int64 departureTime = 4;
+  string departureStation = 5;
+  int64 arrivalTime = 6;
+  string arrivalStation = 7;
+  repeated Mode modes = 8;
+}

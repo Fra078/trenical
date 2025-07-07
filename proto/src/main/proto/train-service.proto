@@ -2,6 +2,8 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "common.proto";
 import "railway-service.proto";
+import "train/train-type.proto";
+import "train/service-class.proto";
 option java_multiple_files = true;
 
 option java_package = "it.trenical.proto.train";
@@ -9,25 +11,19 @@ option java_package = "it.trenical.proto.train";
 
 service TrainManager {
   rpc RegisterTrainType(RegisterTrainTypeRequest) returns (google.protobuf.Empty);
-  rpc GetAllTrainTypes(google.protobuf.Empty) returns (stream TrainTypeResponse);
-  rpc GetTrainTypeByName(TrainTypeByNameRequest) returns (TrainTypeResponse);
+  rpc GetAllTrainTypes(google.protobuf.Empty) returns (stream train.TrainTypeResponse);
+  rpc GetTrainTypeByName(TrainTypeByNameRequest) returns (train.TrainTypeResponse);
   rpc RemoveTrainTypeByName(TrainTypeByNameRequest) returns (google.protobuf.Empty);
 
-  rpc RegisterServiceClass(ServiceClass) returns (google.protobuf.Empty);
-  rpc GetAllServiceClasses(google.protobuf.Empty) returns (stream ServiceClass);
-  rpc GetServiceClassByName(ServiceClassByNameRequest) returns (ServiceClass);
+  rpc RegisterServiceClass(train.ServiceClass) returns (google.protobuf.Empty);
+  rpc GetAllServiceClasses(google.protobuf.Empty) returns (stream train.ServiceClass);
+  rpc GetServiceClassByName(ServiceClassByNameRequest) returns (train.ServiceClass);
   rpc RemoveServiceClassByName(ServiceClassByNameRequest) returns (google.protobuf.Empty);
 
   rpc RegisterTrain(RegisterTrainRequest) returns (TrainResponse);
   rpc GetAllTrains(TrainQueryParameters) returns (stream TrainResponse);
   rpc GetTrainById(TrainId) returns (TrainResponse);
   rpc RemoveTrainById(TrainId) returns (google.protobuf.Empty);
-}
-
-message TrainTypeResponse {
-  string name = 1;
-  double speed = 3;
-  double costPerKm = 4;
 }
 
 message RegisterTrainTypeRequest {
@@ -38,11 +34,6 @@ message RegisterTrainTypeRequest {
 
 message TrainTypeByNameRequest {
   string name = 1;
-}
-
-message ServiceClass {
-  string name = 1;
-  double incrementFactor = 3;
 }
 
 message ServiceClassByNameRequest {
@@ -63,14 +54,14 @@ message TrainId {
 }
 
 message ClassSeats {
-  ServiceClass serviceClass = 1;
+  train.ServiceClass serviceClass = 1;
   int32 count = 2;
 }
 
 message TrainResponse {
   int32 id = 1;
   string name = 2;
-  TrainTypeResponse type = 3;
+  train.TrainTypeResponse type = 3;
   int64 departureTime = 4;
   it.trenical.proto.railway.PathResponse path = 5;
   repeated ClassSeats seats = 6;

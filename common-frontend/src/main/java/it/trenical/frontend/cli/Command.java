@@ -38,6 +38,9 @@ public abstract class Command implements Comparable<Command> {
             System.out.println("Errore GRP, status " + exc.getStatus().getCode() + ": " + exc.getStatus().getDescription());
         } catch (NumberFormatException exc){
             System.out.println(getSyntax());
+        } catch (Exception e){
+            System.out.println("Errore sconosciuto");
+            e.printStackTrace();
         }
         return true;
     }
