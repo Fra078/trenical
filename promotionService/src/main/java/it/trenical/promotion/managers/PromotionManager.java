@@ -6,6 +6,7 @@ import it.trenical.promotion.mappers.PromotionMapper;
 import it.trenical.promotion.models.Promotion;
 import it.trenical.promotion.proto.GetPromotionRequest;
 import it.trenical.promotion.proto.PromotionMessage;
+import it.trenical.promotion.proto.TravelContext;
 import it.trenical.promotion.repository.PromotionRepository;
 
 import java.util.function.Consumer;
