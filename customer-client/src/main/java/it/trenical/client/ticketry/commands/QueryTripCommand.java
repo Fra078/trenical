@@ -1,14 +1,12 @@
 package it.trenical.client.ticketry.commands;
 
 import it.trenical.common.proto.Common;
+import it.trenical.common.proto.DateRange;
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
-import it.trenical.proto.train.TrainQueryParameters;
-import it.trenical.proto.train.TrainResponse;
 import it.trenical.ticketry.proto.TicketryServiceGrpc;
-import it.trenical.ticketry.proto.TripMode;
 import it.trenical.ticketry.proto.TripQueryParams;
-import it.trenical.ticketry.proto.TripSolution;
+import it.trenical.travel.proto.TravelSolution;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +30,7 @@ public class QueryTripCommand extends Command {
         String arrival = args[2];
         builder.setDeparture(departure);
         builder.setArrival(arrival);
+        builder.setTicketCount(1);
 
         for (int i = 3; i < args.length; i += 2) {
             String param = args[i];
@@ -39,21 +38,23 @@ public class QueryTripCommand extends Command {
             switch (param){
                 case "-type" -> builder.setTrainType(value);
                 case "-class" -> builder.setServiceClass(value);
+                case "-count" -> builder.setTicketCount(Integer.parseInt(value));
                 default -> throw new BadCommandSyntaxException(getSyntax());
             }
         }
 
-        Iterator<TripSolution> it = stub.getTripSolutions(builder.build());
+        Iterator<TravelSolution> it = stub.getTripSolutions(builder.build());
         while (it.hasNext()) {
-            TripSolution tripSolution = it.next();
+            TravelSolution tripSolution = it.next();
             System.out.printf("ID:%d %s %s%n", tripSolution.getTrainId(), tripSolution.getType().getName(), tripSolution.getTrainName());
             System.out.printf("%s (%s) --- %s (%s)%n",
-                    tripSolution.getDepartureStation(),
-                    formatTime(tripSolution.getDepartureTime()),
-                    tripSolution.getArrivalStation(),
-                    formatTime(tripSolution.getArrivalTime()));
-            for (TripMode tm : tripSolution.getModesList())
-                System.out.printf("%s €%.2f%n", tm.getServiceClass().getName(), tm.getTotalPrice());
+                    tripSolution.getRouteInfo().getDepartureStation(),
+                    formatTime(tripSolution.getRouteInfo().getDepartureTime()),
+                    tripSolution.getRouteInfo().getArrivalStation(),
+                    formatTime(tripSolution.getRouteInfo().getArrivalTime()));
+            System.out.printf("Distanza: %.3f km", tripSolution.getRouteInfo().getDistance());
+            for (TravelSolution.Mode tm : tripSolution.getModesList())
+                System.out.println(tm);
             System.out.println();
         }
     }
@@ -68,7 +69,7 @@ public class QueryTripCommand extends Command {
 
         ZonedDateTime startOfDay = date.atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-        builder.setDate(Common.DateRange.newBuilder()
+        builder.setDate(DateRange.newBuilder()
                 .setFrom(startOfDay.toEpochSecond())
                 .setTo(endOfDay.toEpochSecond())
                 .build());
