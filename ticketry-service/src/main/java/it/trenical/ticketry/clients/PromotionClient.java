@@ -1,9 +1,10 @@
 package it.trenical.ticketry.clients;
 
-import io.grpc.stub.StreamObserver;
 import it.trenical.promotion.proto.ApplyPromotionResponse;
 import it.trenical.promotion.proto.TravelContextMessage;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface PromotionClient {
-    void applyPromotions(TravelContextMessage ctx, StreamObserver<ApplyPromotionResponse> observer);
+    CompletableFuture<ApplyPromotionResponse> applyPromotions(TravelContextMessage ctx);
 }

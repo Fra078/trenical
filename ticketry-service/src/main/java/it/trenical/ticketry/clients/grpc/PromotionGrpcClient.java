@@ -1,5 +1,6 @@
 package it.trenical.ticketry.clients.grpc;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -7,7 +8,11 @@ import it.trenical.promotion.proto.ApplyPromotionRequest;
 import it.trenical.promotion.proto.ApplyPromotionResponse;
 import it.trenical.promotion.proto.PromotionServiceGrpc;
 import it.trenical.promotion.proto.TravelContextMessage;
+import it.trenical.server.future.FutureMapper;
 import it.trenical.ticketry.clients.PromotionClient;
+import it.trenical.travel.proto.TravelSolution;
+
+import java.util.concurrent.CompletableFuture;
 
 
 public class PromotionGrpcClient implements PromotionClient {
@@ -17,17 +22,15 @@ public class PromotionGrpcClient implements PromotionClient {
             .forAddress("localhost", 5606)
             .usePlaintext()
             .build();
-    private final PromotionServiceGrpc.PromotionServiceStub stub
-            = PromotionServiceGrpc.newStub(channel);
+    private final PromotionServiceGrpc.PromotionServiceFutureStub stub
+            = PromotionServiceGrpc.newFutureStub(channel);
 
     private PromotionGrpcClient() {}
 
 
-    public void applyPromotions(TravelContextMessage ctx){
-        stub.applyPromotions(
-                ApplyPromotionRequest.newBuilder().setContext(ctx).build(),
-                observer
-        );
+    public CompletableFuture<ApplyPromotionResponse> applyPromotions(TravelContextMessage ctx){
+        return FutureMapper.toCompletableFuture(stub.applyPromotions(
+                ApplyPromotionRequest.newBuilder().setContext(ctx).build()));
     }
 
     public static synchronized PromotionGrpcClient getInstance() {

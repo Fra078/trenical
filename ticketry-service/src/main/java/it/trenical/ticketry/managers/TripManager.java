@@ -1,7 +1,6 @@
 package it.trenical.ticketry.managers;
 
 import io.grpc.stub.StreamObserver;
-import it.trenical.promotion.proto.ApplyPromotionResponse;
 import it.trenical.promotion.proto.TravelContextMessage;
 import it.trenical.proto.train.ClassSeats;
 import it.trenical.proto.train.ServiceClass;
@@ -14,10 +13,10 @@ import it.trenical.ticketry.proto.TripQueryParams;
 import it.trenical.ticketry.repositories.TicketRepository;
 import it.trenical.travel.proto.TravelSolution;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
 
 public class TripManager {
 
@@ -36,71 +35,49 @@ public class TripManager {
     }
 
 
-    public void getTripSolutions(TripQueryParams request, StreamObserver<TravelSolution> observer) {
+    public void getTripSolutions(TripQueryParams request, StreamObserver<TravelSolution> outputObserver) {
 
-        final AtomicInteger pendingCalls = new AtomicInteger(0);
-        final AtomicBoolean trainStreamCompleted = new AtomicBoolean(false);
+        final List<CompletableFuture<Void>> trackingList = new ArrayList<>();
 
-        Runnable checkCompletion = () -> {
-            if (trainStreamCompleted.get() && pendingCalls.get() == 0) {
-                observer.onCompleted();
-            }
-        };
-
-        StreamObserver<ApplyPromotionResponse> solutionObserver = new StreamObserver<>() {
-
-            @Override
-            public void onNext(ApplyPromotionResponse response) {
-                observer.onNext(response.getSolution());
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                observer.onError(throwable);
-                pendingCalls.decrementAndGet();
-                checkCompletion.run();
-            }
-
-            @Override
-            public void onCompleted() {
-                pendingCalls.decrementAndGet();
-                checkCompletion.run();
-            }
-        };
-
-        StreamObserver<TrainResponse> trainObserver = new StreamObserver<>() {
-
+        trainClient.getTrainForPath(TripMapper.mapToTrain(request), new StreamObserver<>() {
             @Override
             public void onNext(TrainResponse train) {
-                pendingCalls.incrementAndGet();
-
-                try {
-                    List<ServiceClass> availableClasses = getAvailableClasses(train, request);
-                    TravelContextMessage msg = new TravelContextBuilder().build(train, request, availableClasses);
-                    promotionClient.applyPromotions(msg, solutionObserver);
-                } catch (Exception e) {
-                    pendingCalls.decrementAndGet();
-                    observer.onError(e);
-                }
+                handleTrainResponse(train, request, outputObserver, trackingList);
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                observer.onError(throwable);
+            public void onError(Throwable t) {
+                outputObserver.onError(t);
             }
 
             @Override
             public void onCompleted() {
-                trainStreamCompleted.set(true);
-                checkCompletion.run();
+                CompletableFuture.allOf(trackingList.toArray(new CompletableFuture[0]))
+                        .whenComplete((unused, error) -> {
+                            if (error == null)
+                                outputObserver.onCompleted();
+                        });
             }
-        };
-
-        trainClient.getTrainForPath(
-                TripMapper.mapToTrain(request),
-                trainObserver
-        );
+        });
     }
+
+    private void handleTrainResponse(
+            TrainResponse train,
+            TripQueryParams request,
+            StreamObserver<TravelSolution> responseObserver,
+            List<CompletableFuture<Void>> trackingList
+    ) {
+        TravelContextMessage ctx = new TravelContextBuilder().build(train, request, getAvailableClasses(train, request));
+        CompletableFuture<Void> listenableFuture = promotionClient.applyPromotions(ctx)
+                .thenAccept(risposta2 -> responseObserver.onNext(risposta2.getSolution()))
+                .exceptionally(error -> {
+                    responseObserver.onError(error);
+                    return null;
+                });
+
+        trackingList.add(listenableFuture);
+    }
+
 
     private List<ServiceClass> getAvailableClasses(TrainResponse train, TripQueryParams request) {
         Map<String, Integer> occupiedSeats = ticketRepository.countSeatsForTrain(train.getId());
