@@ -61,8 +61,9 @@ public class PersistentMapDecorator<K,V> implements Map<K,V>, Serializable {
         V result;
         synchronized (fileLock) {
             result = internalMap.putIfAbsent(key, value);
-            if (result != null)
+            if (result == null) {
                 persist();
+            }
         }
         return result;
     }
@@ -129,10 +130,19 @@ public class PersistentMapDecorator<K,V> implements Map<K,V>, Serializable {
     }
 
     private void persist() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            oos.writeObject(internalMap);
+        try {
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                if (!parentDir.mkdirs()) {
+                    System.err.println("Impossibile creare le directory necessarie: " + parentDir.getAbsolutePath());
+                    return;
+                }
+            }
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+                oos.writeObject(internalMap);
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante la scrittura su file: " + file.getAbsolutePath(), e);
         }
     }
     @SuppressWarnings("unchecked")
