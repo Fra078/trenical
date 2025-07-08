@@ -38,7 +38,7 @@ message PromotionMessage {
 }
 
 message ApplyPromotionRequest {
-  promotion.TravelContextMessage context = 1;
+  travel.TravelSolution solution = 1;
 }
 
 message ApplyPromotionResponse {

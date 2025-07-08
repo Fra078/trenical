@@ -8,17 +8,32 @@ package travel;
 
 message TravelSolution {
 
+  message AppliedPromo {
+    string id = 1;
+    string name = 2;
+    double finalPrice = 3;
+  }
+
   message Mode {
     train.ServiceClass serviceClass = 1;
-    double totalPrice = 2;
+    double price = 2;
+    optional AppliedPromo promo = 3;
+  }
+
+  message RouteInfo {
+    int32 pathId = 1;
+    int64 departureTime = 2;
+    string departureStation = 3;
+    int64 arrivalTime = 4;
+    string arrivalStation = 5;
+    double distance = 6;
   }
 
   int32 trainId = 1;
   string trainName = 2;
   train.TrainTypeResponse type = 3;
-  int64 departureTime = 4;
-  string departureStation = 5;
-  int64 arrivalTime = 6;
-  string arrivalStation = 7;
-  repeated Mode modes = 8;
+  RouteInfo routeInfo = 4;
+  int32 ticketCount = 5;
+  string userId = 6;
+  repeated Mode modes = 7;
 }
