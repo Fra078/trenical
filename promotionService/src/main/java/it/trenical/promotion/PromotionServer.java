@@ -8,7 +8,9 @@ import it.trenical.promotion.mappers.EffectMapper;
 import it.trenical.promotion.mappers.PromotionMapper;
 import it.trenical.promotion.mappers.visitors.ConditionMapperVisitor;
 import it.trenical.promotion.mappers.visitors.EffectMapperVisitor;
+import it.trenical.promotion.repository.FidelityProgramRepository;
 import it.trenical.promotion.repository.PromotionRepository;
+import it.trenical.promotion.repository.map.FidelityProgramMapRepository;
 import it.trenical.promotion.repository.map.PromotionRepositoryMap;
 import it.trenical.promotion.services.PromotionService;
 import it.trenical.server.structures.PersistentMapDecorator;
@@ -21,9 +23,11 @@ public class PromotionServer {
     public static void main(String[] args) throws InterruptedException, IOException {
         PromotionMapper promotionMapper = preparePromotionMapper();
         PromotionRepository promotionRepository = new PromotionRepositoryMap(
-                new PersistentMapDecorator<>(new ConcurrentHashMap<>(), "./db/promotions.dat"));
-
-        PromotionManager promotionManager = new PromotionManager(promotionRepository, promotionMapper);
+                new PersistentMapDecorator<>(new ConcurrentHashMap<>(), "db/promotions.dat"));
+        FidelityProgramRepository fidelityRepository = new FidelityProgramMapRepository(
+                new PersistentMapDecorator<>(new ConcurrentHashMap<>(), "db/fidelity.dat")
+        );
+        PromotionManager promotionManager = new PromotionManager(promotionRepository, promotionMapper, fidelityRepository);
 
         Server server = ServerBuilder.forPort(5606)
                 .addService(new PromotionService(promotionManager))

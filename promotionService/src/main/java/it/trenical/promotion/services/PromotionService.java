@@ -15,6 +15,19 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
+    public void applyPromotions(ApplyPromotionRequest request, StreamObserver<ApplyPromotionResponse> responseObserver) {
+        try {
+            ApplyPromotionResponse response = ApplyPromotionResponse.newBuilder()
+                    .setSolution(manager.applyPromotion(request.getSolution()))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException e) {
+            responseObserver.onError(e);
+        }
+    }
+
+    @Override
     public void registerPromotion(PromotionMessage request, StreamObserver<Empty> responseObserver) {
         try {
             manager.registerPromotion(request);
