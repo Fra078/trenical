@@ -28,7 +28,7 @@ public class DayOfWeekCondition implements Condition {
 
     @Override
     public boolean canApply(TravelContext travelCtx) {
-        DayOfWeek day = Instant.ofEpochSecond(travelCtx.date())
+        DayOfWeek day = Instant.ofEpochSecond(travelCtx.getDate())
                 .atZone(ZoneId.systemDefault()).getDayOfWeek();
         return acceptableDays.contains(day);
     }

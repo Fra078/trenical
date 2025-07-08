@@ -1,9 +1,10 @@
 package it.trenical.promotion.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Promotion {
+public class Promotion implements Serializable {
     private final String id;
     private final String name;
     private final String description;

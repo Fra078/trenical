@@ -10,7 +10,7 @@ public class PathCondition implements Condition {
 
     @Override
     public boolean canApply(TravelContext travelCtx) {
-        return travelCtx.pathId() == this.pathId;
+        return travelCtx.getPathId() == this.pathId;
     }
 
     public int getPathId() {

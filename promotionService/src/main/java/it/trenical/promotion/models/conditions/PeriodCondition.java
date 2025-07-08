@@ -23,7 +23,7 @@ public class PeriodCondition implements Condition {
 
     @Override
     public boolean canApply(TravelContext travelCtx) {
-        return start <= travelCtx.date() && end >= travelCtx.date();
+        return start <= travelCtx.getDate() && end >= travelCtx.getDate();
     }
 
     @Override

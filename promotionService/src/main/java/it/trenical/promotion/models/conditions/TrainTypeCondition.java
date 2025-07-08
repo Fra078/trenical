@@ -18,7 +18,7 @@ public class TrainTypeCondition implements Condition {
 
     @Override
     public boolean canApply(TravelContext travelCtx) {
-        return travelCtx.trainType().equals(trainType);
+        return travelCtx.getTrainType().equals(trainType);
     }
 
     @Override

@@ -23,6 +23,6 @@ public class MinCountCondition implements Condition {
 
     @Override
     public boolean canApply(TravelContext travelCtx) {
-        return travelCtx.ticketCount() >= count;
+        return travelCtx.getTicketCount() >= count;
     }
 }
