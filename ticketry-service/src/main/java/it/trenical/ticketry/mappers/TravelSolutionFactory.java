@@ -1,32 +1,55 @@
 package it.trenical.ticketry.mappers;
 
-import it.trenical.promotion.proto.TravelContextMessage;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StopResponse;
 import it.trenical.proto.train.ServiceClass;
 import it.trenical.proto.train.TrainResponse;
 import it.trenical.ticketry.proto.TripQueryParams;
+import it.trenical.ticketry.strategy.PriceCalculationStrategy;
+import it.trenical.travel.proto.TravelSolution;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public class TravelContextBuilder {
+public class TravelSolutionFactory {
 
-    public TravelContextMessage build(
+    private final PriceCalculationStrategy priceCalculationStrategy;
+
+    public TravelSolutionFactory(PriceCalculationStrategy priceCalculationStrategy) {
+        this.priceCalculationStrategy = priceCalculationStrategy;
+    }
+
+
+    public TravelSolution buildFrom(
+            String username,
             TrainResponse train,
             TripQueryParams queryParams,
-            Collection<ServiceClass> classes
+            Collection<ServiceClass> serviceClasses
     ) {
-        return TravelContextMessage.newBuilder()
+
+        TravelSolution.RouteInfo routeInfo = calculateRouteInfo(train, queryParams.getDeparture(),queryParams.getArrival());
+        List<TravelSolution.Mode> modes = serviceClasses.stream()
+                .map(sc-> TravelSolution.Mode.newBuilder()
+                        .setServiceClass(sc)
+                        .setPrice(
+                                priceCalculationStrategy.computePrice(routeInfo.getDistance(),
+                                        sc.getIncrementFactor(),
+                                        train.getType().getCostPerKm()))
+                        .build())
+                .toList();
+        return TravelSolution.newBuilder()
                 .setTrainId(train.getId())
                 .setTrainName(train.getName())
-                .setTrainType(train.getType())
+                .setType(train.getType())
+                .setRouteInfo(routeInfo)
+                .setUserId(username)
                 .setTicketCount(queryParams.getTicketCount())
-                .setRouteInfo(calculateRouteInfo(train, queryParams.getDeparture(), queryParams.getArrival()))
+                .addAllModes(modes)
                 .build();
     }
 
-    private TravelContextMessage.RouteInfo calculateRouteInfo(
+    private TravelSolution.RouteInfo calculateRouteInfo(
             TrainResponse train,
             String departure,
             String arrival
@@ -46,14 +69,16 @@ public class TravelContextBuilder {
 
         long departureTime = train.getDepartureTime() + Math.round(departureDistance * 3600 / speed);
         long arrivalTime = train.getDepartureTime() + Math.round(arrivalDistance * 3600 / speed);
-        return TravelContextMessage.RouteInfo.newBuilder()
+        return TravelSolution.RouteInfo.newBuilder()
                 .setPathId(path.getId())
                 .setDepartureStation(departure)
                 .setDepartureTime(departureTime)
                 .setArrivalStation(arrival)
                 .setArrivalTime(arrivalTime)
-                .setDistance(departureDistance-arrivalDistance)
+                .setDistance(arrivalDistance-departureDistance)
                 .build();
     }
+
+
 
 }

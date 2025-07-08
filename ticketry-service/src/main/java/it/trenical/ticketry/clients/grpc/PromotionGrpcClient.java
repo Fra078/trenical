@@ -28,9 +28,9 @@ public class PromotionGrpcClient implements PromotionClient {
     private PromotionGrpcClient() {}
 
 
-    public CompletableFuture<ApplyPromotionResponse> applyPromotions(TravelContextMessage ctx){
+    public CompletableFuture<ApplyPromotionResponse> applyPromotions(TravelSolution solution){
         return FutureMapper.toCompletableFuture(stub.applyPromotions(
-                ApplyPromotionRequest.newBuilder().setContext(ctx).build()));
+                ApplyPromotionRequest.newBuilder().setSolution(solution).build()));
     }
 
     public static synchronized PromotionGrpcClient getInstance() {
