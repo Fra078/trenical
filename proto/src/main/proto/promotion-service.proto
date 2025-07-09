@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "google/protobuf/empty.proto";
+import "common.proto";
 import "promotion/promotion-condition.proto";
 import "promotion/promotion-effect.proto";
 import "promotion/travel-context.proto";
@@ -10,15 +10,17 @@ package promo;
 
 
 service PromotionService {
-  rpc RegisterPromotion(PromotionMessage) returns (google.protobuf.Empty);
+  rpc RegisterPromotion(PromotionMessage) returns (Empty);
   rpc GetAllPromotions(GetAllPromotionsRequest) returns (stream PromotionMessage);
-  rpc UpdatePromotionState(UpdatePromotionRequest) returns (google.protobuf.Empty);
+  rpc UpdatePromotionState(UpdatePromotionRequest) returns (Empty);
   rpc GetPromotionById(GetPromotionRequest) returns (PromotionMessage);
 
   rpc ApplyPromotions(ApplyPromotionRequest) returns (ApplyPromotionResponse);
 
-  rpc SubscribeToFidelity(SubscribeToFidelityRequest) returns (google.protobuf.Empty);
-  rpc UnsubscribeToFidelity(UnsubscribeToFidelityRequest) returns (google.protobuf.Empty);
+  rpc SubscribeToFidelity(SubscribeToFidelityRequest) returns (Empty);
+  rpc UnsubscribeToFidelity(UnsubscribeToFidelityRequest) returns (Empty);
+  rpc GetFidelitySubscriptionInfo(GetSubscriptionInfoRequest) returns (GetSubscriptionInfoResponse);
+  rpc ListenToFidelityPromotions(ListenPromotionRequest) returns (stream PromotionMessage);
 }
 
 message GetAllPromotionsRequest {
@@ -55,5 +57,18 @@ message SubscribeToFidelityRequest {
 }
 
 message UnsubscribeToFidelityRequest {
+  string username = 1;
+}
+
+message GetSubscriptionInfoRequest {
+  string username = 1;
+}
+
+message GetSubscriptionInfoResponse {
+  bool subscribed = 1;
+  int64 fromDate = 2;
+}
+
+message ListenPromotionRequest {
   string username = 1;
 }

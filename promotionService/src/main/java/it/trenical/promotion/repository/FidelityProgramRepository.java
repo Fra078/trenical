@@ -1,10 +1,14 @@
 package it.trenical.promotion.repository;
 
-public interface FidelityProgramRepository {
+import java.util.Optional;
 
-    boolean isFidelityUser(String username);
+public interface FidelityProgramRepository {
+    default boolean isFidelityUser(String username){
+        return getSubscriptionDate(username).isPresent();
+    }
+
+    Optional<Long> getSubscriptionDate(String username);
 
     boolean subscribeToProgram(String username);
     boolean unsubscribeFromProgram(String username);
-
 }

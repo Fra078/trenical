@@ -1,28 +1,31 @@
 package it.trenical.promotion.repository.map;
 
 import it.trenical.promotion.repository.FidelityProgramRepository;
+
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 public class FidelityProgramMapRepository implements FidelityProgramRepository {
 
-    private final Map<String, Boolean> map;
+    private final Map<String, Long> map;
 
-    public FidelityProgramMapRepository(Map<String, Boolean> map) {
+    public FidelityProgramMapRepository(Map<String, Long> map) {
         this.map = map;
     }
 
     @Override
-    public boolean isFidelityUser(String username) {
-        return map.get(username) != null;
+    public Optional<Long> getSubscriptionDate(String username) {
+        return Optional.ofNullable(map.get(username));
     }
 
     @Override
     public boolean subscribeToProgram(String username) {
-        return map.putIfAbsent(username, true) != null;
+        return map.putIfAbsent(username, Instant.now().getEpochSecond()) == null;
     }
 
     @Override
     public boolean unsubscribeFromProgram(String username) {
-        return map.remove(username);
+        return map.remove(username) != null;
     }
 }
