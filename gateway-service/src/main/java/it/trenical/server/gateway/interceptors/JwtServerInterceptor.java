@@ -1,4 +1,4 @@
-package it.trenical.server.jwt;
+package it.trenical.server.gateway.interceptors;
 
 import io.grpc.*;
 import io.jsonwebtoken.Claims;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import it.trenical.server.jwt.JwtUtils;
 
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
@@ -55,7 +56,8 @@ public class JwtServerInterceptor implements ServerInterceptor {
         } catch (JwtException e) {
             System.err.println("Verifica JWT fallita: " + e.getMessage());
             call.close(Status.UNAUTHENTICATED.withDescription("Token validation failed: " + e.getMessage()), new Metadata());
-            return new ServerCall.Listener<ReqT>() {};
+            return new ServerCall.Listener<>() {
+            };
         }
     }
 }

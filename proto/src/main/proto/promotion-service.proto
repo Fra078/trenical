@@ -6,6 +6,8 @@ import "promotion/travel-context.proto";
 import "travel/travel-solution.proto";
 option java_multiple_files = true;
 option java_package = "it.trenical.promotion.proto";
+package promo;
+
 
 service PromotionService {
   rpc RegisterPromotion(PromotionMessage) returns (google.protobuf.Empty);
@@ -14,6 +16,9 @@ service PromotionService {
   rpc GetPromotionById(GetPromotionRequest) returns (PromotionMessage);
 
   rpc ApplyPromotions(ApplyPromotionRequest) returns (ApplyPromotionResponse);
+
+  rpc SubscribeToFidelity(SubscribeToFidelityRequest) returns (google.protobuf.Empty);
+  rpc UnsubscribeToFidelity(UnsubscribeToFidelityRequest) returns (google.protobuf.Empty);
 }
 
 message GetAllPromotionsRequest {
@@ -43,4 +48,12 @@ message ApplyPromotionRequest {
 
 message ApplyPromotionResponse {
   travel.TravelSolution solution = 1;
+}
+
+message SubscribeToFidelityRequest {
+  string username = 1;
+}
+
+message UnsubscribeToFidelityRequest {
+  string username = 1;
 }

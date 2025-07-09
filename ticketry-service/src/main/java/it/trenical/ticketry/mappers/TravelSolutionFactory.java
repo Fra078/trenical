@@ -10,7 +10,6 @@ import it.trenical.travel.proto.TravelSolution;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class TravelSolutionFactory {
 
@@ -22,7 +21,6 @@ public class TravelSolutionFactory {
 
 
     public TravelSolution buildFrom(
-            String username,
             TrainResponse train,
             TripQueryParams queryParams,
             Collection<ServiceClass> serviceClasses
@@ -43,7 +41,7 @@ public class TravelSolutionFactory {
                 .setTrainName(train.getName())
                 .setType(train.getType())
                 .setRouteInfo(routeInfo)
-                .setUserId(username)
+                .setUserId(queryParams.getUsername())
                 .setTicketCount(queryParams.getTicketCount())
                 .addAllModes(modes)
                 .build();

@@ -1,10 +1,9 @@
-package it.trenical.client.ticketry.commands;
+package it.trenical.client.app.commands;
 
-import it.trenical.common.proto.Common;
 import it.trenical.common.proto.DateRange;
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
-import it.trenical.ticketry.proto.TicketryServiceGrpc;
+import it.trenical.server.gateway.proto.TrenicalGatewayGrpc;
 import it.trenical.ticketry.proto.TripQueryParams;
 import it.trenical.travel.proto.TravelSolution;
 
@@ -13,9 +12,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 
 public class QueryTripCommand extends Command {
-    private TicketryServiceGrpc.TicketryServiceBlockingStub stub;
+    private final TrenicalGatewayGrpc.TrenicalGatewayBlockingStub stub;
 
-    public QueryTripCommand(TicketryServiceGrpc.TicketryServiceBlockingStub stub) {
+    public QueryTripCommand(TrenicalGatewayGrpc.TrenicalGatewayBlockingStub stub) {
         super("trip query", "Ricerca treni disponibili");
         this.stub = stub;
     }
@@ -43,7 +42,7 @@ public class QueryTripCommand extends Command {
             }
         }
 
-        Iterator<TravelSolution> it = stub.getTripSolutions(builder.build());
+        Iterator<TravelSolution> it = stub.queryTravelSolutions(builder.build());
         while (it.hasNext()) {
             TravelSolution tripSolution = it.next();
             System.out.printf("ID:%d %s %s%n", tripSolution.getTrainId(), tripSolution.getType().getName(), tripSolution.getTrainName());

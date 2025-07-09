@@ -10,7 +10,6 @@ import it.trenical.ticketry.mappers.TravelSolutionFactory;
 import it.trenical.ticketry.mappers.TripMapper;
 import it.trenical.ticketry.proto.TripQueryParams;
 import it.trenical.ticketry.repositories.TicketRepository;
-import it.trenical.ticketry.strategy.PriceCalculationStrategy;
 import it.trenical.travel.proto.TravelSolution;
 
 import java.util.ArrayList;
@@ -38,14 +37,14 @@ public class TripManager {
     }
 
 
-    public void getTripSolutions(TripQueryParams request, String username, StreamObserver<TravelSolution> outputObserver) {
+    public void getTripSolutions(TripQueryParams request, StreamObserver<TravelSolution> outputObserver) {
 
         final List<CompletableFuture<Void>> trackingList = new ArrayList<>();
 
         trainClient.getTrainForPath(TripMapper.mapToTrain(request), new StreamObserver<>() {
             @Override
             public void onNext(TrainResponse train) {
-                handleTrainResponse(train, request, username, outputObserver, trackingList);
+                handleTrainResponse(train, request, outputObserver, trackingList);
             }
 
             @Override
@@ -67,12 +66,11 @@ public class TripManager {
     private void handleTrainResponse(
             TrainResponse train,
             TripQueryParams request,
-            String username,
             StreamObserver<TravelSolution> responseObserver,
             List<CompletableFuture<Void>> trackingList
     ) {
 
-        TravelSolution travelSolution = factory.buildFrom(username, train, request, getAvailableClasses(train, request));
+        TravelSolution travelSolution = factory.buildFrom(train, request, getAvailableClasses(train, request));
         CompletableFuture<Void> listenableFuture = promotionClient.applyPromotions(travelSolution)
                 .thenAccept(response -> responseObserver.onNext(response.getSolution()))
                 .exceptionally(error -> {

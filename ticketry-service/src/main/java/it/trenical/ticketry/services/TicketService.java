@@ -1,8 +1,6 @@
 package it.trenical.ticketry.services;
 
-import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
-import it.trenical.server.jwt.JwtServerInterceptor;
 import it.trenical.ticketry.managers.TripManager;
 import it.trenical.ticketry.proto.TicketryServiceGrpc;
 import it.trenical.ticketry.proto.TripQueryParams;
@@ -18,7 +16,6 @@ public class TicketService extends TicketryServiceGrpc.TicketryServiceImplBase {
 
     @Override
     public void getTripSolutions(TripQueryParams request, StreamObserver<TravelSolution> responseObserver) {
-        String username = JwtServerInterceptor.USER_ID.get();
-        tripManager.getTripSolutions(request, username, responseObserver);
+        tripManager.getTripSolutions(request, responseObserver);
     }
 }

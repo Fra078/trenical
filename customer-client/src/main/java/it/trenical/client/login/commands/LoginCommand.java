@@ -2,18 +2,17 @@ package it.trenical.client.login.commands;
 
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
+import it.trenical.server.gateway.proto.LoginServiceGrpc;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SigninRequest;
-import it.trenical.user.proto.SignupRequest;
-import it.trenical.user.proto.UserServiceGrpc;
 
 import java.util.function.Consumer;
 
 public class LoginCommand extends Command {
-    private final UserServiceGrpc.UserServiceBlockingStub stub;
+    private final LoginServiceGrpc.LoginServiceBlockingStub stub;
     private final Consumer<LoginResponse> onLoggedIn;
 
-    public LoginCommand(UserServiceGrpc.UserServiceBlockingStub stub, Consumer<LoginResponse> onLoggedIn) {
+    public LoginCommand(LoginServiceGrpc.LoginServiceBlockingStub stub, Consumer<LoginResponse> onLoggedIn) {
         super("login", "Accedi al servizio");
         this.stub = stub;
         this.onLoggedIn = onLoggedIn;

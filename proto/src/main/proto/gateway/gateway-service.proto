@@ -1,0 +1,17 @@
+syntax = "proto3";
+import "common.proto";
+import "promotion-service.proto";
+import "ticketry-service.proto";
+import "travel/travel-solution.proto";
+
+option java_multiple_files = true;
+option java_package="it.trenical.server.gateway.proto";
+
+package gateway;
+
+service TrenicalGateway {
+  rpc SubscribeToFidelity(Empty) returns (Empty);
+  rpc UnsubscribeToFidelity(Empty) returns (Empty);
+
+  rpc QueryTravelSolutions(ticketry.TripQueryParams) returns (stream travel.TravelSolution);
+}

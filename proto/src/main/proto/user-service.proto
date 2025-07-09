@@ -10,20 +10,24 @@ service UserService {
   rpc GetUser(GetUserRequest) returns (UserResponse);
 }
 
+message SignupRequest {
+  string username = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+}
+
+message SigninRequest {
+  string username = 1;
+  string password = 2;
+}
+
 message GetUserRequest {
   string username = 1;
 }
 
 message UserResponse {
   string username = 2;
-  string firstName = 3;
-  string lastName = 4;
-  UserType type = 5;
-}
-
-message SignupRequest {
-  string username = 1;
-  string password = 2;
   string firstName = 3;
   string lastName = 4;
 }
@@ -33,15 +37,4 @@ message LoginResponse {
   string username = 2;
   string firstName = 3;
   string lastName = 4;
-  UserType type = 5;
-}
-
-message SigninRequest {
-  string username = 1;
-  string password = 2;
-}
-
-enum UserType {
-  STANDARD = 0;
-  FIDELITY = 1;
 }

@@ -3,7 +3,6 @@ package it.trenical.ticketry;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import it.trenical.server.database.DatabaseManager;
-import it.trenical.server.jwt.JwtServerInterceptor;
 import it.trenical.ticketry.clients.PromotionClient;
 import it.trenical.ticketry.clients.TrainClient;
 import it.trenical.ticketry.clients.grpc.PromotionGrpcClient;
@@ -27,10 +26,8 @@ public class TicketryServer {
         PriceCalculationStrategy priceStrategy = new LinearPriceCalculationStrategy();
         TravelSolutionFactory solutionFactory = new TravelSolutionFactory(priceStrategy);
         TripManager tripManager = new TripManager(trainClient, ticketRepository, promotionClient, solutionFactory);
-
         Server server = ServerBuilder.forPort(8778)
                 .addService(new TicketService(tripManager))
-                .intercept(new JwtServerInterceptor())
                 .build().start();
         System.out.println("Server started on port " + server.getPort());
         server.awaitTermination();
