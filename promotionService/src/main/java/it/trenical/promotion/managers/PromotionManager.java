@@ -1,53 +1,43 @@
 package it.trenical.promotion.managers;
 
-import io.grpc.Status;
-import it.trenical.promotion.mappers.PromotionMapper;
+import it.trenical.promotion.exceptions.AlreadyExistPromotionException;
 import it.trenical.promotion.models.Condition;
 import it.trenical.promotion.models.Promotion;
 import it.trenical.promotion.models.TravelContext;
-import it.trenical.promotion.proto.GetPromotionRequest;
-import it.trenical.promotion.proto.PromotionMessage;
 import it.trenical.promotion.repository.FidelityProgramRepository;
 import it.trenical.promotion.repository.PromotionRepository;
 import it.trenical.travel.proto.TravelSolution;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class PromotionManager {
 
     private final PromotionRepository promotionRepository;
-    private final PromotionMapper promotionMapper;
     private final FidelityProgramRepository fidelityProgramRepository;
 
-    public PromotionManager(PromotionRepository promotionRepository, PromotionMapper promotionMapper, FidelityProgramRepository fidelityProgramRepository) {
+    public PromotionManager(
+            PromotionRepository promotionRepository,
+            FidelityProgramRepository fidelityProgramRepository
+    ) {
         this.promotionRepository = promotionRepository;
-        this.promotionMapper = promotionMapper;
         this.fidelityProgramRepository = fidelityProgramRepository;
     }
 
-    public void registerPromotion(PromotionMessage request) {
-        Promotion promotion = promotionMapper.fromProto(request);
+    public void registerPromotion(Promotion promotion) {
         boolean done = promotionRepository.save(promotion);
         if (!done)
-            throw Status.ALREADY_EXISTS
-                    .withDescription("Already exists a promotion with id "+ request.getId())
-                    .asRuntimeException();
+            throw new AlreadyExistPromotionException(promotion.getId());
     }
 
-    public void findAllPromotions(Consumer<PromotionMessage> consumer) {
-        promotionRepository.findAll((promo) -> {
-            consumer.accept(promotionMapper.toProto(promo));
-        });
+    public void findAllPromotions(Consumer<Promotion> consumer) {
+        promotionRepository.findAll(consumer);
     }
 
-    public PromotionMessage findById(GetPromotionRequest request) {
-        Promotion promo =  promotionRepository.findById(request.getId()).orElseThrow(
-                Status.NOT_FOUND::asRuntimeException);
-        return promotionMapper.toProto(promo);
+    public Promotion findById(String promoId) {
+        return promotionRepository.findById(promoId).orElseThrow(
+                () -> new NoSuchElementException("Promo with id " + promoId + " not found!")
+        );
     }
 
     public TravelSolution applyPromotion(TravelSolution msg){
