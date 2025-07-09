@@ -4,14 +4,8 @@ public record User(
         String username,
         String passwordHash,
         String firstName,
-        String lastName,
-        Type type
+        String lastName
 ) {
-
-    public enum Type {
-        STANDARD,
-        FIDELITY
-    }
 
     public static Builder builder() {
         return new Builder();
@@ -26,7 +20,6 @@ public record User(
         private String passwordHash;
         private String firstName;
         private String lastName;
-        private Type type;
 
 
         public String getUsername() {
@@ -45,10 +38,6 @@ public record User(
             return lastName;
         }
 
-        public Type getType() {
-            return type;
-        }
-
         private Builder() {}
 
         private Builder(User user) {
@@ -56,7 +45,6 @@ public record User(
             this.passwordHash = user.passwordHash;
             this.firstName = user.firstName;
             this.lastName = user.lastName;
-            this.type = user.type;
         }
 
         public Builder setUsername(String username) {
@@ -79,13 +67,8 @@ public record User(
             return this;
         }
 
-        public Builder setType(Type type) {
-            this.type = type;
-            return this;
-        }
-
         public User build() {
-            return new User(username, passwordHash, firstName, lastName, type);
+            return new User(username, passwordHash, firstName, lastName);
         }
 
 

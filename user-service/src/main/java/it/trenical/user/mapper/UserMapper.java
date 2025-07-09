@@ -4,7 +4,6 @@ import it.trenical.user.models.User;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SignupRequest;
 import it.trenical.user.proto.UserResponse;
-import it.trenical.user.proto.UserType;
 
 public class UserMapper {
     private UserMapper(){
@@ -17,7 +16,6 @@ public class UserMapper {
                 .setPasswordHash(passwordHash)
                 .setFirstName(request.getFirstName())
                 .setLastName(request.getLastName())
-                .setType(User.Type.STANDARD)
                 .build();
     }
 
@@ -27,7 +25,6 @@ public class UserMapper {
                 .setFirstName(user.firstName())
                 .setLastName(user.lastName())
                 .setUsername(user.username())
-                .setType(toDto(user.type()))
                 .build();
     }
 
@@ -36,15 +33,7 @@ public class UserMapper {
                 .setFirstName(user.firstName())
                 .setLastName(user.lastName())
                 .setUsername(user.username())
-                .setType(toDto(user.type()))
                 .build();
     }
 
-    public static UserType toDto(User.Type type) {
-        return switch (type) {
-            case STANDARD -> UserType.STANDARD;
-            case FIDELITY -> UserType.FIDELITY;
-            default -> throw new IllegalStateException("Unexpected value: " + type);
-        };
-    }
 }

@@ -36,13 +36,12 @@ public class UserJdbcRepository implements UserRepository {
     }
 
     private void insertUser(Connection connection, User user) throws SQLException {
-        String sql = "INSERT INTO UserEntity (username,passwordHash,firstName,lastName,type) VALUES (?, ?, ?, ?,?)";
+        String sql = "INSERT INTO UserEntity (username,passwordHash,firstName,lastName) VALUES (?, ?, ?, ?,?)";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.username());
             ps.setString(2, user.passwordHash());
             ps.setString(3, user.firstName());
             ps.setString(4, user.lastName());
-            ps.setString(5, user.type().name());
             ps.executeUpdate();
         }
     }
@@ -65,7 +64,6 @@ public class UserJdbcRepository implements UserRepository {
                 .setPasswordHash(rs.getString("passwordHash"))
                 .setFirstName(rs.getString("firstName"))
                 .setLastName(rs.getString("lastName"))
-                .setType(User.Type.valueOf(rs.getString("type")))
                 .build();
     }
 
@@ -75,8 +73,7 @@ public class UserJdbcRepository implements UserRepository {
                     username VARCHAR(255) PRIMARY KEY NOT NULL,
                     passwordHash VARCHAR(255) NOT NULL,
                     firstName VARCHAR(255) NOT NULL,
-                    lastName VARCHAR(255) NOT NULL,
-                    type VARCHAR(255) NOT NULL
+                    lastName VARCHAR(255) NOT NULL
                 );
                 """;
         try(PreparedStatement stmt = connection.prepareStatement(sql)) {
