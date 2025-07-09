@@ -3,15 +3,16 @@ package it.trenical.admin.promotion.commands;
 import it.trenical.admin.promotion.creator.PromotionCreator;
 import it.trenical.frontend.cli.Command;
 import it.trenical.frontend.cli.exceptions.BadCommandSyntaxException;
+import it.trenical.promotion.proto.GetPromotionRequest;
 import it.trenical.promotion.proto.PromotionMessage;
 import it.trenical.promotion.proto.PromotionServiceGrpc;
 
-public class CreatePromotionCommand extends Command {
+public class UpdatePromotionCommand extends Command {
 
     private final PromotionServiceGrpc.PromotionServiceBlockingStub stub;
 
-    public CreatePromotionCommand(PromotionServiceGrpc.PromotionServiceBlockingStub stub) {
-        super("promo create", "Crea una nuova promozione");
+    public UpdatePromotionCommand(PromotionServiceGrpc.PromotionServiceBlockingStub stub) {
+        super("promo update", "Crea una nuova promozione");
         this.stub = stub;
     }
 
@@ -19,8 +20,10 @@ public class CreatePromotionCommand extends Command {
     protected void action(String[] args) throws BadCommandSyntaxException {
         if (args.length != 1)
             throw new BadCommandSyntaxException(getSyntax());
-        String promotionId = args[0];
-        new PromotionCreator(stub, PromotionMessage.newBuilder().setId(promotionId), false).start();
+        String sourceId = args[0];
+        PromotionMessage src = stub.getPromotionById(GetPromotionRequest.newBuilder().setId(sourceId).build());
+        PromotionMessage.Builder builder = PromotionMessage.newBuilder(src);
+        new PromotionCreator(stub, builder, true).start();
     }
 
     @Override

@@ -16,6 +16,6 @@ public class SubscribeToLoyaltyCommand extends Command {
 
     @Override
     protected void action(String[] args) {
-        stub.subscribeToFidelity(Empty.getDefaultInstance());
+        stub.subscribeToLoyalty(Empty.getDefaultInstance());
     }
 }

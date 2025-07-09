@@ -2,17 +2,15 @@ package it.trenical.promotion.services;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import it.trenical.common.proto.Empty;
 import it.trenical.promotion.exceptions.AlreadyExistPromotionException;
-import it.trenical.promotion.managers.FidelityProgramManager;
+import it.trenical.promotion.managers.LoyaltyManager;
 import it.trenical.promotion.managers.PromotionBroadcastManager;
 import it.trenical.promotion.managers.PromotionManager;
 import it.trenical.promotion.mappers.PromotionMapper;
 import it.trenical.promotion.models.Promotion;
 import it.trenical.promotion.models.conditions.FidelityCondition;
-import it.trenical.promotion.observer.Broadcast;
 import it.trenical.promotion.observer.StreamObserverAdapter;
 import it.trenical.promotion.proto.*;
 
@@ -22,18 +20,18 @@ import java.util.Optional;
 public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplBase {
 
     private final PromotionManager manager;
-    private final FidelityProgramManager fidelityProgramManager;
+    private final LoyaltyManager loyaltyManager;
     private final PromotionBroadcastManager broadcastManager;
     private final PromotionMapper promotionMapper;
 
     public PromotionService(
             PromotionManager manager,
-            FidelityProgramManager fidelityProgramManager,
+            LoyaltyManager loyaltyManager,
             PromotionBroadcastManager broadcastManager,
             PromotionMapper promotionMapper
     ) {
         this.manager = manager;
-        this.fidelityProgramManager = fidelityProgramManager;
+        this.loyaltyManager = loyaltyManager;
         this.promotionMapper = promotionMapper;
         this.broadcastManager = broadcastManager;
     }
@@ -86,8 +84,8 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
 
 
     @Override
-    public void subscribeToFidelity(SubscribeToFidelityRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = fidelityProgramManager.subscribeToProgram(request.getUsername());
+    public void subscribeToLoyalty(SubscribeToLoyaltyRequest request, StreamObserver<Empty> responseObserver) {
+        boolean done = loyaltyManager.subscribeToProgram(request.getUsername());
         if (!done) {
             responseObserver.onError(Status.ALREADY_EXISTS.withDescription("User is already subscribed").asRuntimeException());
             return;
@@ -97,8 +95,8 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
-    public void unsubscribeToFidelity(UnsubscribeToFidelityRequest request, StreamObserver<Empty> responseObserver) {
-        boolean done = fidelityProgramManager.unsubscribeToProgram(request.getUsername());
+    public void unsubscribeToLoyalty(UnsubscribeToLoyaltyRequest request, StreamObserver<Empty> responseObserver) {
+        boolean done = loyaltyManager.unsubscribeToProgram(request.getUsername());
         if (!done) {
             responseObserver.onError(Status.NOT_FOUND.withDescription("User is not subscribed").asRuntimeException());
             return;
@@ -109,9 +107,9 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
-    public void getFidelitySubscriptionInfo(GetSubscriptionInfoRequest request, StreamObserver<GetSubscriptionInfoResponse> responseObserver) {
+    public void getLoyaltySubscriptionInfo(GetSubscriptionInfoRequest request, StreamObserver<GetSubscriptionInfoResponse> responseObserver) {
         try {
-            Optional<Long> subscriptionDate = fidelityProgramManager.getSubscriptionInfo(request.getUsername());
+            Optional<Long> subscriptionDate = loyaltyManager.getSubscriptionInfo(request.getUsername());
             responseObserver.onNext(GetSubscriptionInfoResponse.newBuilder()
                                         .setSubscribed(subscriptionDate.isPresent())
                                         .setFromDate(subscriptionDate.orElse(0L))
@@ -123,13 +121,11 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
-    public void listenToFidelityPromotions(ListenPromotionRequest request, StreamObserver<PromotionMessage> responseObserver) {
-        if (fidelityProgramManager.getSubscriptionInfo(request.getUsername()).isEmpty()) {
+    public void listenToLoyaltyPromotions(ListenPromotionRequest request, StreamObserver<PromotionMessage> responseObserver) {
+        if (loyaltyManager.getSubscriptionInfo(request.getUsername()).isEmpty()) {
             responseObserver.onError(Status.PERMISSION_DENIED.withDescription("User is not subscribed").asRuntimeException());
             return;
         }
         broadcastManager.register(request.getUsername(), new StreamObserverAdapter<>(responseObserver, promotionMapper::toProto));
-        /*((ServerCallStreamObserver<PromotionMessage>) responseObserver).setOnCancelHandler(()->
-                broadcastManager.disconnectUser(request.getUsername()));*/
     }
 }

@@ -28,9 +28,9 @@ public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase
     }
 
     @Override
-    public void subscribeToFidelity(Empty request, StreamObserver<Empty> responseObserver) {
-        promotionService.subscribeToFidelity(
-                SubscribeToFidelityRequest.newBuilder()
+    public void subscribeToLoyalty(Empty request, StreamObserver<Empty> responseObserver) {
+        promotionService.subscribeToLoyalty(
+                SubscribeToLoyaltyRequest.newBuilder()
                         .setUsername(JwtServerInterceptor.USER_ID.get())
                         .build(),
                 responseObserver
@@ -38,9 +38,9 @@ public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase
     }
 
     @Override
-    public void unsubscribeToFidelity(Empty request, StreamObserver<Empty> responseObserver) {
-        promotionService.unsubscribeToFidelity(
-                UnsubscribeToFidelityRequest.newBuilder()
+    public void unsubscribeToLoyalty(Empty request, StreamObserver<Empty> responseObserver) {
+        promotionService.unsubscribeToLoyalty(
+                UnsubscribeToLoyaltyRequest.newBuilder()
                         .setUsername(JwtServerInterceptor.USER_ID.get())
                         .build(),
                 responseObserver
@@ -48,8 +48,8 @@ public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase
     }
 
     @Override
-    public void getFidelitySubscriptionInfo(Empty request, StreamObserver<GetSubscriptionInfoResponse> responseObserver) {
-        promotionService.getFidelitySubscriptionInfo(
+    public void getLoyaltySubscriptionInfo(Empty request, StreamObserver<GetSubscriptionInfoResponse> responseObserver) {
+        promotionService.getLoyaltySubscriptionInfo(
                 GetSubscriptionInfoRequest.newBuilder()
                         .setUsername(JwtServerInterceptor.USER_ID.get())
                         .build(),
@@ -58,8 +58,8 @@ public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase
     }
 
     @Override
-    public void listenToFidelityPromotions(Empty request, StreamObserver<PromotionMessage> responseObserver) {
-        promotionService.listenToFidelityPromotions(
+    public void listenToLoyaltyPromotions(Empty request, StreamObserver<PromotionMessage> responseObserver) {
+        promotionService.listenToLoyaltyPromotions(
                 ListenPromotionRequest.newBuilder()
                         .setUsername(JwtServerInterceptor.USER_ID.get())
                         .build(),

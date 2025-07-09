@@ -2,7 +2,7 @@ package it.trenical.promotion.repository;
 
 import java.util.Optional;
 
-public interface FidelityProgramRepository {
+public interface LoyaltyRepository {
     default boolean isFidelityUser(String username){
         return getSubscriptionDate(username).isPresent();
     }

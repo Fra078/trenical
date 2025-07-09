@@ -2,7 +2,7 @@ package it.trenical.promotion;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import it.trenical.promotion.managers.FidelityProgramManager;
+import it.trenical.promotion.managers.LoyaltyManager;
 import it.trenical.promotion.managers.PromotionBroadcastManager;
 import it.trenical.promotion.managers.PromotionManager;
 import it.trenical.promotion.mappers.ConditionMapper;
@@ -10,9 +10,9 @@ import it.trenical.promotion.mappers.EffectMapper;
 import it.trenical.promotion.mappers.PromotionMapper;
 import it.trenical.promotion.mappers.visitors.ConditionMapperVisitor;
 import it.trenical.promotion.mappers.visitors.EffectMapperVisitor;
-import it.trenical.promotion.repository.FidelityProgramRepository;
+import it.trenical.promotion.repository.LoyaltyRepository;
 import it.trenical.promotion.repository.PromotionRepository;
-import it.trenical.promotion.repository.map.FidelityProgramMapRepository;
+import it.trenical.promotion.repository.map.LoyaltyMapRepository;
 import it.trenical.promotion.repository.map.PromotionRepositoryMap;
 import it.trenical.promotion.services.PromotionService;
 import it.trenical.server.structures.PersistentMapDecorator;
@@ -26,18 +26,18 @@ public class PromotionServer {
         PromotionMapper promotionMapper = preparePromotionMapper();
 
         PromotionRepository promotionRepository = preparePromotionRepository();
-        FidelityProgramRepository fidelityRepository = prepareFidelityRepository();
+        LoyaltyRepository fidelityRepository = prepareFidelityRepository();
 
         PromotionBroadcastManager broadcast = new PromotionBroadcastManager();
 
         PromotionManager promotionManager =
                 new PromotionManager(promotionRepository, fidelityRepository);
 
-        FidelityProgramManager fidelityProgramManager
-                = new FidelityProgramManager(fidelityRepository);
+        LoyaltyManager loyaltyManager
+                = new LoyaltyManager(fidelityRepository);
 
         Server server = ServerBuilder.forPort(5606)
-                .addService(new PromotionService(promotionManager, fidelityProgramManager, broadcast, promotionMapper))
+                .addService(new PromotionService(promotionManager, loyaltyManager, broadcast, promotionMapper))
                 .build().start();
 
         System.out.println("Server started on port " + server.getPort());
@@ -57,8 +57,8 @@ public class PromotionServer {
                 new PersistentMapDecorator<>(new ConcurrentHashMap<>(), "db/promotions.dat"));
     }
 
-    private static FidelityProgramRepository prepareFidelityRepository() {
-        return new FidelityProgramMapRepository(
+    private static LoyaltyRepository prepareFidelityRepository() {
+        return new LoyaltyMapRepository(
                 new PersistentMapDecorator<>(new ConcurrentHashMap<>(), "db/fidelity.dat")
         );
     }

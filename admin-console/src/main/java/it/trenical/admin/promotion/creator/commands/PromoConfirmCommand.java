@@ -10,21 +10,27 @@ public class PromoConfirmCommand extends Command {
     private final PromotionMessage.Builder builder;
     private final PromotionServiceGrpc.PromotionServiceBlockingStub stub;
     private final Runnable exitAction;
+    private final boolean update;
 
     public PromoConfirmCommand(
             PromotionServiceGrpc.PromotionServiceBlockingStub stub,
             PromotionMessage.Builder builder,
+            boolean update,
             Runnable exitAction
     ) {
         super("confirm", "Conferma i dati della promo");
         this.builder = builder;
         this.stub = stub;
         this.exitAction = exitAction;
+        this.update = update;
     }
 
     @Override
     protected void action(String[] args) throws BadCommandSyntaxException {
-        stub.registerPromotion(builder.build());
+        if (update)
+            stub.updatePromotion(builder.build());
+        else
+            stub.registerPromotion(builder.build());
         System.out.println("Operazione completata!");
         exitAction.run();
     }

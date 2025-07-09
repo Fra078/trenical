@@ -15,6 +15,6 @@ public class UnsubscribeFromLoyaltyCommand extends Command {
 
     @Override
     protected void action(String[] args) {
-        stub.unsubscribeToFidelity(Empty.getDefaultInstance());
+        stub.unsubscribeToLoyalty(Empty.getDefaultInstance());
     }
 }

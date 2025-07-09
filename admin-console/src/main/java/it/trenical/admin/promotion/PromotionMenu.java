@@ -2,9 +2,7 @@ package it.trenical.admin.promotion;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import it.trenical.admin.promotion.commands.CreatePromotionCommand;
-import it.trenical.admin.promotion.commands.GetAllPromotionsCommand;
-import it.trenical.admin.promotion.commands.GetPromotionCommand;
+import it.trenical.admin.promotion.commands.*;
 import it.trenical.frontend.cli.Cli;
 import it.trenical.promotion.proto.PromotionServiceGrpc;
 
@@ -22,7 +20,10 @@ public class PromotionMenu extends Cli {
         registerCommands(
                 new GetPromotionCommand(stub),
                 new GetAllPromotionsCommand(stub),
-                new CreatePromotionCommand(stub)
+                new CreatePromotionCommand(stub),
+                new UpdatePromotionCommand(stub),
+                new RemovePromotionCommand(stub),
+                new CopyPromotionCommand(stub)
         );
     }
 

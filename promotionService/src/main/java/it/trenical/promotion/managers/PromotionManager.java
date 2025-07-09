@@ -4,7 +4,7 @@ import it.trenical.promotion.exceptions.AlreadyExistPromotionException;
 import it.trenical.promotion.models.Condition;
 import it.trenical.promotion.models.Promotion;
 import it.trenical.promotion.models.TravelContext;
-import it.trenical.promotion.repository.FidelityProgramRepository;
+import it.trenical.promotion.repository.LoyaltyRepository;
 import it.trenical.promotion.repository.PromotionRepository;
 import it.trenical.travel.proto.TravelSolution;
 
@@ -14,14 +14,14 @@ import java.util.function.Consumer;
 public class PromotionManager {
 
     private final PromotionRepository promotionRepository;
-    private final FidelityProgramRepository fidelityProgramRepository;
+    private final LoyaltyRepository loyaltyRepository;
 
     public PromotionManager(
             PromotionRepository promotionRepository,
-            FidelityProgramRepository fidelityProgramRepository
+            LoyaltyRepository loyaltyRepository
     ) {
         this.promotionRepository = promotionRepository;
-        this.fidelityProgramRepository = fidelityProgramRepository;
+        this.loyaltyRepository = loyaltyRepository;
     }
 
     public void registerPromotion(Promotion promotion) {
@@ -45,7 +45,7 @@ public class PromotionManager {
                 .setPathId(msg.getRouteInfo().getPathId())
                 .setDate(msg.getRouteInfo().getDepartureTime())
                 .setTrainType(msg.getType().getName())
-                .setIsFidelty(fidelityProgramRepository.isFidelityUser(msg.getUserId()))
+                .setIsFidelty(loyaltyRepository.isFidelityUser(msg.getUserId()))
                 .setTicketCount(msg.getTicketCount());
 
 

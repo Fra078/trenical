@@ -22,7 +22,7 @@ public class ListenToPromotionsCommand extends Command {
     protected void action(String[] args) throws BadCommandSyntaxException {
         Thread thread = new Thread(() -> {
             try {
-                Iterator<PromotionMessage> it = stub.listenToFidelityPromotions(Empty.getDefaultInstance());
+                Iterator<PromotionMessage> it = stub.listenToLoyaltyPromotions(Empty.getDefaultInstance());
                 while (it.hasNext()) {
                     System.out.println("PROMO: {");
                     System.out.println(it.next());

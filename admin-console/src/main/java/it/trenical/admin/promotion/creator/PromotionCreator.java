@@ -15,19 +15,21 @@ import java.util.Scanner;
 
 public class PromotionCreator extends Cli {
 
-    private final PromotionMessage.Builder builder = PromotionMessage.newBuilder();
     private final PromotionServiceGrpc.PromotionServiceBlockingStub stub;
 
-    public PromotionCreator(PromotionServiceGrpc.PromotionServiceBlockingStub stub, String id) {
+    public PromotionCreator(
+            PromotionServiceGrpc.PromotionServiceBlockingStub stub,
+            PromotionMessage.Builder builder,
+            boolean update
+    ) {
         super("PromotionCreator");
-        builder.setId(id);
         this.stub = stub;
         registerCommands(
                 new PromoSetNameCommand(builder),
                 new PromoSetDescriptionCommand(builder),
                 new PromoGetStatusCommand(builder),
                 new PromoRemoveCondition(builder),
-                new PromoConfirmCommand(stub, builder, super::exit)
+                new PromoConfirmCommand(stub, builder, update, super::exit)
         );
         registerCommands(
                 new CountDiscountEffectCommand(builder),

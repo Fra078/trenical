@@ -1,14 +1,14 @@
 package it.trenical.promotion.managers;
 
-import it.trenical.promotion.repository.FidelityProgramRepository;
+import it.trenical.promotion.repository.LoyaltyRepository;
 
 import java.util.Optional;
 
-public class FidelityProgramManager {
+public class LoyaltyManager {
 
-    private final FidelityProgramRepository repository;
+    private final LoyaltyRepository repository;
 
-    public FidelityProgramManager(FidelityProgramRepository repository) {
+    public LoyaltyManager(LoyaltyRepository repository) {
         this.repository = repository;
     }
 

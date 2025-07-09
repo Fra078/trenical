@@ -20,7 +20,7 @@ public class LoyaltyInfoCommand extends Command {
 
     @Override
     protected void action(String[] args) {
-        GetSubscriptionInfoResponse response = stub.getFidelitySubscriptionInfo(Empty.getDefaultInstance());
+        GetSubscriptionInfoResponse response = stub.getLoyaltySubscriptionInfo(Empty.getDefaultInstance());
         if (response.getSubscribed()) {
             String date = Instant.ofEpochSecond(response.getFromDate()).atZone(ZoneId.systemDefault())
                             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
