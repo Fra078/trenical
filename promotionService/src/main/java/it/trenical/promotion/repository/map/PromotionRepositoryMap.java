@@ -20,6 +20,11 @@ public class PromotionRepositoryMap implements PromotionRepository {
     }
 
     @Override
+    public boolean update(Promotion promotion) {
+        return map.replace(promotion.getName(), promotion)!= null;
+    }
+
+    @Override
     public void findAll(Consumer<Promotion> consumer) {
         map.values().forEach(consumer);
     }
@@ -27,5 +32,10 @@ public class PromotionRepositoryMap implements PromotionRepository {
     @Override
     public Optional<Promotion> findById(String id) {
         return Optional.ofNullable(map.get(id));
+    }
+
+    @Override
+    public boolean deleteById(String id) {
+        return map.remove(id) != null;
     }
 }

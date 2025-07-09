@@ -10,10 +10,10 @@ option java_package="it.trenical.server.gateway.proto";
 package gateway;
 
 service TrenicalGateway {
-  rpc SubscribeToFidelity(Empty) returns (Empty);
-  rpc UnsubscribeToFidelity(Empty) returns (Empty);
-  rpc GetFidelitySubscriptionInfo(Empty) returns (promo.GetSubscriptionInfoResponse);
-  rpc ListenToFidelityPromotions(Empty) returns (stream promo.PromotionMessage);
+  rpc SubscribeToLoyalty(Empty) returns (Empty);
+  rpc UnsubscribeToLoyalty(Empty) returns (Empty);
+  rpc GetLoyaltySubscriptionInfo(Empty) returns (promo.GetSubscriptionInfoResponse);
+  rpc ListenToLoyaltyPromotions(Empty) returns (stream promo.PromotionMessage);
 
   rpc QueryTravelSolutions(ticketry.TripQueryParams) returns (stream travel.TravelSolution);
 }

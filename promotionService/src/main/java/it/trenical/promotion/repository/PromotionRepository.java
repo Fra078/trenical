@@ -7,6 +7,9 @@ import java.util.function.Consumer;
 
 public interface PromotionRepository {
     boolean save(Promotion promotion);
+    boolean update(Promotion promotion);
     void findAll(Consumer<Promotion> consumer);
     Optional<Promotion> findById(String id);
+
+    boolean deleteById(String id);
 }

@@ -64,6 +64,31 @@ public class PromotionService extends PromotionServiceGrpc.PromotionServiceImplB
     }
 
     @Override
+    public void updatePromotion(PromotionMessage request, StreamObserver<Empty> responseObserver) {
+        try {
+            Promotion promotion = promotionMapper.fromProto(request);
+            manager.updatePromotion(promotion);
+            if (promotion.getConditions().stream().anyMatch(c->c instanceof FidelityCondition))
+                broadcastManager.broadcast(promotion);
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException exc){
+            responseObserver.onError(Status.NOT_FOUND.withDescription(exc.getMessage()).asRuntimeException());
+        }
+    }
+
+    @Override
+    public void removePromotion(RemovePromotionRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            manager.removePromotion(request.getId());
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException exc){
+            responseObserver.onError(Status.NOT_FOUND.withDescription(exc.getMessage()).asRuntimeException());
+        }
+    }
+
+    @Override
     public void getAllPromotions(GetAllPromotionsRequest request, StreamObserver<PromotionMessage> responseObserver) {
         manager.findAllPromotions((promo)->
                 responseObserver.onNext(promotionMapper.toProto(promo))

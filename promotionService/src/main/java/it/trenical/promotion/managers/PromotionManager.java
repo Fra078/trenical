@@ -30,6 +30,19 @@ public class PromotionManager {
             throw new AlreadyExistPromotionException(promotion.getId());
     }
 
+    public void updatePromotion(Promotion promotion) {
+        boolean done = promotionRepository.update(promotion);
+        if (!done)
+            throw new NoSuchElementException("Not exists a promotion with id " + promotion.getId());
+
+    }
+
+    public void removePromotion(String id) {
+        boolean done = promotionRepository.deleteById(id);
+        if (!done)
+            throw new NoSuchElementException("Not exists a promotion with id " + id);
+    }
+
     public void findAllPromotions(Consumer<Promotion> consumer) {
         promotionRepository.findAll(consumer);
     }

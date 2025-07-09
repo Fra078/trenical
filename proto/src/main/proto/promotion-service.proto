@@ -8,19 +8,19 @@ option java_multiple_files = true;
 option java_package = "it.trenical.promotion.proto";
 package promo;
 
-
 service PromotionService {
   rpc RegisterPromotion(PromotionMessage) returns (Empty);
+  rpc UpdatePromotion(PromotionMessage) returns (Empty);
+  rpc RemovePromotion(RemovePromotionRequest) returns (Empty);
   rpc GetAllPromotions(GetAllPromotionsRequest) returns (stream PromotionMessage);
-  rpc UpdatePromotionState(UpdatePromotionRequest) returns (Empty);
   rpc GetPromotionById(GetPromotionRequest) returns (PromotionMessage);
 
   rpc ApplyPromotions(ApplyPromotionRequest) returns (ApplyPromotionResponse);
 
-  rpc SubscribeToFidelity(SubscribeToFidelityRequest) returns (Empty);
-  rpc UnsubscribeToFidelity(UnsubscribeToFidelityRequest) returns (Empty);
-  rpc GetFidelitySubscriptionInfo(GetSubscriptionInfoRequest) returns (GetSubscriptionInfoResponse);
-  rpc ListenToFidelityPromotions(ListenPromotionRequest) returns (stream PromotionMessage);
+  rpc SubscribeToLoyalty(SubscribeToLoyaltyRequest) returns (Empty);
+  rpc UnsubscribeToLoyalty(UnsubscribeToLoyaltyRequest) returns (Empty);
+  rpc GetLoyaltySubscriptionInfo(GetSubscriptionInfoRequest) returns (GetSubscriptionInfoResponse);
+  rpc ListenToLoyaltyPromotions(ListenPromotionRequest) returns (stream PromotionMessage);
 }
 
 message GetAllPromotionsRequest {
@@ -31,9 +31,8 @@ message GetPromotionRequest {
   string id = 1;
 }
 
-message UpdatePromotionRequest {
+message RemovePromotionRequest {
   string id = 1;
-  bool enable = 2;
 }
 
 message PromotionMessage {
@@ -52,11 +51,11 @@ message ApplyPromotionResponse {
   travel.TravelSolution solution = 1;
 }
 
-message SubscribeToFidelityRequest {
+message SubscribeToLoyaltyRequest {
   string username = 1;
 }
 
-message UnsubscribeToFidelityRequest {
+message UnsubscribeToLoyaltyRequest {
   string username = 1;
 }
 
