@@ -1,4 +1,4 @@
-package it.trenical.ticketry.mappers;
+package it.trenical.ticketry.managers;
 
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StopResponse;
@@ -19,14 +19,24 @@ public class TravelSolutionFactory {
         this.priceCalculationStrategy = priceCalculationStrategy;
     }
 
-
     public TravelSolution buildFrom(
             TrainResponse train,
             TripQueryParams queryParams,
             Collection<ServiceClass> serviceClasses
     ) {
+        return buildFrom(train, queryParams.getDeparture(), queryParams.getArrival(), queryParams.getUsername(), queryParams.getTicketCount(), serviceClasses);
+    }
 
-        TravelSolution.RouteInfo routeInfo = calculateRouteInfo(train, queryParams.getDeparture(),queryParams.getArrival());
+    public TravelSolution buildFrom(
+            TrainResponse train,
+            String departure,
+            String arrival,
+            String username,
+            int ticketCount,
+            Collection<ServiceClass> serviceClasses
+    ) {
+
+        TravelSolution.RouteInfo routeInfo = calculateRouteInfo(train, departure, arrival);
         List<TravelSolution.Mode> modes = serviceClasses.stream()
                 .map(sc-> TravelSolution.Mode.newBuilder()
                         .setServiceClass(sc)
@@ -41,8 +51,8 @@ public class TravelSolutionFactory {
                 .setTrainName(train.getName())
                 .setType(train.getType())
                 .setRouteInfo(routeInfo)
-                .setUserId(queryParams.getUsername())
-                .setTicketCount(queryParams.getTicketCount())
+                .setUserId(username)
+                .setTicketCount(ticketCount)
                 .addAllModes(modes)
                 .build();
     }
