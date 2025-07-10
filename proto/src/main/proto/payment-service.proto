@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "it.trenical.payment.proto";
+package payment;
+
+service PaymentService {
+  rpc MakePayment(MakePaymentRequest) returns (PaymentResponse);
+}
+
+message MakePaymentRequest {
+  double amount = 1;
+  string userId = 2;
+  string creditCardInfo = 3;
+}
+
+message PaymentResponse {
+  bool success = 1;
+  optional int32 transactionId = 2;
+}
