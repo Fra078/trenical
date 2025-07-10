@@ -32,7 +32,7 @@ public class ReserveTicketsStep implements PurchaseStep {
                 .build();
         
         List <Ticket> tickets = ticketRepository.addTicketIfPossible(prototype, context.getProcessedSolution().getTicketCount(), context.getMaxClassCount());
-
+        System.out.println("RESERVED: " + tickets.stream().map(Ticket::getId).toList());
         if (tickets.isEmpty()) {
             return CompletableFuture.failedFuture(Status.UNAVAILABLE.withDescription("There aren't enough seats available").asRuntimeException());
         }

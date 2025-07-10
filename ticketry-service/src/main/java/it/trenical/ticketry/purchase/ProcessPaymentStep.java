@@ -3,13 +3,12 @@ package it.trenical.ticketry.purchase;
 import it.trenical.payment.proto.MakePaymentRequest;
 import it.trenical.ticketry.clients.PaymentClient;
 import it.trenical.travel.proto.TravelSolution;
-
 import java.util.concurrent.CompletableFuture;
 
 public class ProcessPaymentStep implements PurchaseStep {
     private PurchaseStep next;
     private final PaymentClient paymentClient;
-    private final PurchaseStep errorHandler; // In caso di fallimento
+    private final PurchaseStep errorHandler;
 
     public ProcessPaymentStep(PaymentClient paymentClient, PurchaseStep errorHandler) {
         this.paymentClient = paymentClient;
@@ -32,12 +31,16 @@ public class ProcessPaymentStep implements PurchaseStep {
 
         return paymentClient.makePayment(request)
                 .thenCompose(response -> {
+                    System.out.println("Payment successful? " + response);
                     if (response.getSuccess()) {
                         return next.execute(context);
                     } else {
                         return errorHandler.execute(context);
                     }
                 })
-                .exceptionallyCompose(ex -> errorHandler.execute(context));
+                .exceptionallyCompose(ex ->{
+                        System.out.println(ex);
+                        return errorHandler.execute(context);}
+                );
     }
 }

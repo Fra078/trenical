@@ -56,7 +56,6 @@ class LoginManagerTest {
         User existingUser = User.builder()
                 .setUsername("testuser")
                 .setPasswordHash("...")
-                .setType(User.Type.FIDELITY)
                 .setFirstName("TEST")
                 .setLastName("TETET").build();
         try {userRepository.save(existingUser);} catch (Exception ignored) {}

@@ -20,16 +20,12 @@ public class ConfirmTicketsStep implements PurchaseStep {
 
     @Override
     public CompletableFuture<PurchaseContext> execute(PurchaseContext context) {
-        // Eseguiamo l'operazione in modo asincrono
         return CompletableFuture.runAsync(() -> {
-            // Confermiamo i biglietti che abbiamo precedentemente riservato nel contesto
             ticketRepository.confirmTickets(context.getReservedTickets());
         }).thenCompose(v -> {
-            // Una volta completata la conferma, passiamo al passo successivo (es. SuccessStep)
             if (next != null) {
                 return next.execute(context);
             }
-            // Se questo è l'ultimo passo, restituiamo semplicemente il contesto
             return CompletableFuture.completedFuture(context);
         });
     }

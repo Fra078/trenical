@@ -10,6 +10,9 @@ public interface TicketRepository {
     Optional<Ticket> findById(int trainId, int id);
     List<Ticket> findByCustomerId(int customerId);
     List<Ticket> findByTrainId(int trainId);
+
+    List<Ticket> findAll();
+
     Map<String, Integer> countSeatsForTrain(int trainId);
     void confirmTickets(List<Ticket> tickets);
 

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,11 +66,13 @@ public class PurchaseManagerTest {
     void clearDb() throws SQLException {
         try (Connection conn = dbManager.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute("DROP ALL OBJECTS");
+        List<Ticket> tickets = ticketRepository.findAll();
+        System.out.println(tickets);
         }
     }
 
     @Test
-    void buyTicketsSuccessful() {
+    void buyTicketsSuccessful() throws InterruptedException {
         PurchaseTicketRequest request = createPurchaseRequest();
         fakeTrainClient.setTrainToReturn(createFakeTrainResponse());
         fakePaymentClient.paymentSuccess = true;
@@ -77,13 +80,18 @@ public class PurchaseManagerTest {
 
         purchaseManager.buyTickets(request, fakeResponseObserver);
 
+        Thread.sleep(1000);
+
         TicketConfirm finalConfirmation = fakeResponseObserver.confirmation.get();
+        Throwable t = fakeResponseObserver.error.get();
         assertNotNull(finalConfirmation);
         assertFalse(finalConfirmation.getTicketIdList().isEmpty());
 
-        Optional<Ticket> savedTicket = ticketRepository.findById(1, 1);
-        assertTrue(savedTicket.isPresent(), "Il biglietto dovrebbe essere salvato nel database");
-        assertEquals(Ticket.Status.CONFIRMED, savedTicket.get().getStatus(), "Lo stato del biglietto dovrebbe essere CONFIRMED");
+        for (int id: finalConfirmation.getTicketIdList()){
+            Optional<Ticket> savedTicket = ticketRepository.findById(finalConfirmation.getTrainId(), id);
+            assertTrue(savedTicket.isPresent(), "Il biglietto dovrebbe essere salvato nel database");
+            assertEquals(Ticket.Status.CONFIRMED, savedTicket.get().getStatus(), "Lo stato del biglietto dovrebbe essere CONFIRMED");
+        }
     }
 
     private PurchaseTicketRequest createPurchaseRequest() {

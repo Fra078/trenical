@@ -72,6 +72,22 @@ public class TicketJdbcRepository implements TicketRepository {
     }
 
     @Override
+    public List<Ticket> findAll() {
+        return db.withConnection(connection -> {
+            List<Ticket> tickets = new ArrayList<>();
+            String sql = "SELECT * FROM Ticket";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        tickets.add(fromResultSet(rs));
+                    }
+                }
+            }
+            return tickets;
+        });
+    }
+
+    @Override
     public Map<String, Integer> countSeatsForTrain(int trainId) {
         return db.withConnection(connection -> {
             Map<String, Integer> counts = new HashMap<>();
@@ -96,7 +112,7 @@ public class TicketJdbcRepository implements TicketRepository {
                 for (Ticket t : tickets) {
                     stmt.setString(1, Ticket.Status.CONFIRMED.name());
                     stmt.setInt(2, t.getId());
-                    stmt.setInt(2, t.getTrainId());
+                    stmt.setInt(3, t.getTrainId());
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -124,7 +140,7 @@ public class TicketJdbcRepository implements TicketRepository {
         String countSql = """
                 SELECT COUNT(*)
                 FROM Ticket
-                WHERE train_id = ? AND className = ?
+                WHERE trainId = ? AND className = ?
                 """;
 
         String insertSql = """
@@ -164,6 +180,7 @@ public class TicketJdbcRepository implements TicketRepository {
                     Ticket t = Ticket.newBuilder(ticket).id(rs.getInt(1)).build();
                     tickets.add(t);
                 }
+                connection.commit();
                 return tickets;
             }
         });

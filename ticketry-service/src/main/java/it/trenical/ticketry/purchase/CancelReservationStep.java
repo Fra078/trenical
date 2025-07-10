@@ -2,11 +2,8 @@ package it.trenical.ticketry.purchase;
 
 import io.grpc.Status;
 import it.trenical.ticketry.models.Ticket;
-import it.trenical.ticketry.purchase.PurchaseContext;
-import it.trenical.ticketry.purchase.PurchaseStep;
 import it.trenical.ticketry.repositories.TicketRepository;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CancelReservationStep implements PurchaseStep {
     private final TicketRepository ticketRepository;
