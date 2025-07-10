@@ -5,7 +5,9 @@ import it.trenical.proto.train.TrainQueryParameters;
 import it.trenical.proto.train.TrainResponse;
 
 public interface TrainClient {
-    void getTrainForPath(
+    void getTrainsForPath(
             TrainQueryParameters request, StreamObserver<TrainResponse> observer
     );
+
+    void getTrain(int trainId, StreamObserver<TrainResponse> observer);
 }
