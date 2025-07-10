@@ -89,6 +89,37 @@ public class TicketJdbcRepository implements TicketRepository {
     }
 
     @Override
+    public void confirmTickets(List<Ticket> tickets) {
+        String sql = "UPDATE Ticket SET status = ? WHERE id = ? AND trainId = ?";
+        db.withConnection(connection -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                for (Ticket t : tickets) {
+                    stmt.setString(1, Ticket.Status.CONFIRMED.name());
+                    stmt.setInt(2, t.getId());
+                    stmt.setInt(2, t.getTrainId());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        });
+    }
+
+    @Override
+    public void removeTicketsById(int trainId, List<Integer> ids) {
+        String sql = "DELETE FROM Ticket WHERE id = ? AND trainId = ?";
+        db.withConnection(connection -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                for (Integer id : ids) {
+                    stmt.setInt(1, id);
+                    stmt.setInt(2, trainId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        });
+    }
+
+    @Override
     public List<Ticket> addTicketIfPossible(Ticket ticket, int count, int maxClassCount) {
         String countSql = """
                 SELECT COUNT(*)
@@ -155,7 +186,7 @@ public class TicketJdbcRepository implements TicketRepository {
     private void createTable(Connection connection) throws SQLException {
         String sql = """
                 CREATE TABLE IF NOT EXISTS Ticket (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    id INT AUTO_INCREMENT,
                     trainId INT NOT NULL,
                     className VARCHAR(255) NOT NULL,
                     transactionId INT,

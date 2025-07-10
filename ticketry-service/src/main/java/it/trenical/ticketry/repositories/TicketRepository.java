@@ -12,6 +12,8 @@ public interface TicketRepository {
     List<Ticket> findByTrainId(int trainId);
     Map<String, Integer> countSeatsForTrain(int trainId);
     void confirmTickets(List<Ticket> tickets);
-    void removeTicketsById(List<Integer> id);
+
+    void removeTicketsById(int trainId, List<Integer> ids);
+
     List<Ticket> addTicketIfPossible(Ticket ticket, int count, int maxClassCount);
 }
