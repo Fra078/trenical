@@ -22,3 +22,8 @@ message TripQueryParams {
   optional string trainType = 6;
   string username = 7;
 }
+
+message TicketConfirm {
+  int32 trainId = 1;
+  repeated int32 ticketId = 2;
+}

@@ -8,7 +8,7 @@ import it.trenical.ticketry.clients.TrainClient;
 import it.trenical.ticketry.clients.grpc.PromotionGrpcClient;
 import it.trenical.ticketry.clients.grpc.TrainGrpcClient;
 import it.trenical.ticketry.managers.TripManager;
-import it.trenical.ticketry.mappers.TravelSolutionFactory;
+import it.trenical.ticketry.managers.TravelSolutionFactory;
 import it.trenical.ticketry.repositories.TicketRepository;
 import it.trenical.ticketry.repositories.jdbc.TicketJdbcRepository;
 import it.trenical.ticketry.services.TicketService;

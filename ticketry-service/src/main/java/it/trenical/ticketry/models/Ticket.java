@@ -7,11 +7,17 @@ public class Ticket {
     private final String className;
     private final String transactionId;
     private final String promoId;
-    private final String ownerName;
-    private final int customerId;
+    private final String customerId;
     private final String departure;
     private final String arrival;
+    private final Status status;
 
+    public enum Status {
+        CONFIRMED,
+        WAITING,
+        BOOKED,
+        CANCELLED
+    }
 
     private Ticket(Builder builder) {
         this.trainId = builder.trainId;
@@ -19,10 +25,10 @@ public class Ticket {
         this.className = builder.className;
         this.transactionId = builder.transactionId;
         this.promoId = builder.promoId;
-        this.ownerName = builder.ownerName;
         this.customerId = builder.customerId;
         this.departure = builder.departure;
         this.arrival = builder.arrival;
+        this.status = builder.status;
     }
 
     public int getTrainId() {
@@ -45,11 +51,7 @@ public class Ticket {
         return promoId;
     }
 
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public int getCustomerId() {
+    public String getCustomerId() {
         return customerId;
     }
 
@@ -61,8 +63,16 @@ public class Ticket {
         return arrival;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static Builder newBuilder(Ticket prototype) {
+        return new Builder(prototype);
     }
 
     public static class Builder {
@@ -71,12 +81,24 @@ public class Ticket {
         private String className;
         private String transactionId;
         private String promoId;
-        private String ownerName;
-        private int customerId;
+        private String customerId;
         private String departure;
         private String arrival;
+        private Status status;
 
         private Builder() {}
+
+        private Builder(Ticket prototype) {
+            this.trainId = prototype.trainId;
+            this.id = prototype.id;
+            this.className = prototype.className;
+            this.transactionId = prototype.transactionId;
+            this.promoId = prototype.promoId;
+            this.customerId = prototype.customerId;
+            this.departure = prototype.departure;
+            this.arrival = prototype.arrival;
+            this.status = prototype.status;
+        }
 
         public Builder trainId(int trainId) {
             this.trainId = trainId;
@@ -103,12 +125,7 @@ public class Ticket {
             return this;
         }
 
-        public Builder ownerName(String ownerName) {
-            this.ownerName = ownerName;
-            return this;
-        }
-
-        public Builder customerId(int customerId) {
+        public Builder customerId(String customerId) {
             this.customerId = customerId;
             return this;
         }
@@ -120,6 +137,11 @@ public class Ticket {
 
         public Builder arrival(String arrival) {
             this.arrival = arrival;
+            return this;
+        }
+
+        public Builder status(Status status) {
+            this.status = status;
             return this;
         }
 

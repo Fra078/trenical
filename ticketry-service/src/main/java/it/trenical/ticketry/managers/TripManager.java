@@ -6,7 +6,6 @@ import it.trenical.proto.train.ServiceClass;
 import it.trenical.proto.train.TrainResponse;
 import it.trenical.ticketry.clients.PromotionClient;
 import it.trenical.ticketry.clients.TrainClient;
-import it.trenical.ticketry.mappers.TravelSolutionFactory;
 import it.trenical.ticketry.mappers.TripMapper;
 import it.trenical.ticketry.proto.TripQueryParams;
 import it.trenical.ticketry.repositories.TicketRepository;
@@ -41,7 +40,7 @@ public class TripManager {
 
         final List<CompletableFuture<Void>> trackingList = new ArrayList<>();
 
-        trainClient.getTrainForPath(TripMapper.mapToTrain(request), new StreamObserver<>() {
+        trainClient.getTrainsForPath(TripMapper.mapToTrain(request), new StreamObserver<>() {
             @Override
             public void onNext(TrainResponse train) {
                 handleTrainResponse(train, request, outputObserver, trackingList);

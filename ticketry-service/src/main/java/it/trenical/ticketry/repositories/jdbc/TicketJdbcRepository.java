@@ -21,40 +21,6 @@ public class TicketJdbcRepository implements TicketRepository {
     }
 
     @Override
-    public Ticket save(Ticket ticket) {
-        return db.withConnection(connection -> {
-            String sql = "INSERT INTO Ticket (trainId, className, transactionId, promoId, ownerName, customerId, departure, arrival) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setInt(1, ticket.getTrainId());
-                ps.setString(2, ticket.getClassName());
-                ps.setString(3, ticket.getTransactionId());
-                ps.setString(4, ticket.getPromoId());
-                ps.setString(5, ticket.getOwnerName());
-                ps.setInt(6, ticket.getCustomerId());
-                ps.setString(7, ticket.getDeparture());
-                ps.setString(8, ticket.getArrival());
-                ps.executeUpdate();
-                ResultSet rs = ps.getGeneratedKeys();
-                if (!rs.next()) {
-                    throw new SQLException("Salvataggio del biglietto fallito, nessun ID ottenuto.");
-                }
-                int generatedId = rs.getInt(1);
-                return Ticket.newBuilder()
-                        .id(generatedId)
-                        .trainId(ticket.getTrainId())
-                        .className(ticket.getClassName())
-                        .transactionId(ticket.getTransactionId())
-                        .promoId(ticket.getPromoId())
-                        .ownerName(ticket.getOwnerName())
-                        .customerId(ticket.getCustomerId())
-                        .departure(ticket.getDeparture())
-                        .arrival(ticket.getArrival())
-                        .build();
-            }
-        });
-    }
-
-    @Override
     public Optional<Ticket> findById(int trainId, int id) {
         return db.withConnection(connection -> {
             String sql = "SELECT * FROM Ticket WHERE trainId = ? AND id = ?";
@@ -122,6 +88,56 @@ public class TicketJdbcRepository implements TicketRepository {
         });
     }
 
+    @Override
+    public List<Ticket> addTicketIfPossible(Ticket ticket, int count, int maxClassCount) {
+        String countSql = """
+                SELECT COUNT(*)
+                FROM Ticket
+                WHERE train_id = ? AND className = ?
+                """;
+
+        String insertSql = """
+                INSERT INTO Ticket (trainId, className, promoId, customerId, departure, arrival, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
+
+        return db.withConnection(false, connection -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try(PreparedStatement stmt = connection.prepareStatement(countSql)){
+                stmt.setInt(1, ticket.getTrainId());
+                stmt.setString(2, ticket.getClassName());
+                try(ResultSet rs = stmt.executeQuery()){
+                    rs.next();
+                    int currentCount = rs.getInt(1);
+                    if(count > maxClassCount - currentCount) {
+                        return List.of();
+                    }
+                }
+            }
+            try(PreparedStatement stmt = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)){
+                stmt.setInt(1, ticket.getTrainId());
+                stmt.setString(2, ticket.getClassName());
+                stmt.setString(3, ticket.getPromoId());
+                stmt.setString(4, ticket.getCustomerId());
+                stmt.setString(5, ticket.getDeparture());
+                stmt.setString(6, ticket.getArrival());
+                stmt.setString(7, ticket.getStatus().toString());
+                int r = stmt.executeUpdate();
+                if (r != count) {
+                    connection.rollback();
+                    throw new SQLException("Insertion failed");
+                }
+                ResultSet rs = stmt.getGeneratedKeys();
+                List<Ticket> tickets = new ArrayList<>();
+                while (rs.next()) {
+                    Ticket t = Ticket.newBuilder(ticket).id(rs.getInt(1)).build();
+                    tickets.add(t);
+                }
+                return tickets;
+            }
+        });
+    }
+
     private Ticket fromResultSet(ResultSet rs) throws SQLException {
         return Ticket.newBuilder()
                 .id(rs.getInt("id"))
@@ -129,25 +145,25 @@ public class TicketJdbcRepository implements TicketRepository {
                 .className(rs.getString("className"))
                 .transactionId(rs.getString("transactionId"))
                 .promoId(rs.getString("promoId"))
-                .ownerName(rs.getString("ownerName"))
-                .customerId(rs.getInt("customerId"))
+                .customerId(rs.getString("customerId"))
                 .departure(rs.getString("departure"))
                 .arrival(rs.getString("arrival"))
+                .status(Ticket.Status.valueOf(rs.getString("status")))
                 .build();
     }
 
     private void createTable(Connection connection) throws SQLException {
         String sql = """
                 CREATE TABLE IF NOT EXISTS Ticket (
-                    id INT AUTO_INCREMENT,
+                    id INT AUTO_INCREMENT PRIMARY KEY,
                     trainId INT NOT NULL,
                     className VARCHAR(255) NOT NULL,
-                    transactionId VARCHAR(255),
+                    transactionId INT,
                     promoId VARCHAR(255),
-                    ownerName VARCHAR(255) NOT NULL,
-                    customerId INT NOT NULL,
+                    customerId VARCHAR(255) NOT NULL,
                     departure VARCHAR(255) NOT NULL,
                     arrival VARCHAR(255) NOT NULL,
+                    status VARCHAR(255) NOT NULL,
                     PRIMARY KEY (id, trainId)
                 );
                 """;

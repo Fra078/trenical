@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface TicketRepository {
-    Ticket save(Ticket ticket);
     Optional<Ticket> findById(int trainId, int id);
     List<Ticket> findByCustomerId(int customerId);
     List<Ticket> findByTrainId(int trainId);
     Map<String, Integer> countSeatsForTrain(int trainId);
+    void confirmTickets(List<Ticket> tickets);
+    void removeTicketsById(List<Integer> id);
+    List<Ticket> addTicketIfPossible(Ticket ticket, int count, int maxClassCount);
 }
