@@ -1,0 +1,17 @@
+syntax="proto3";
+
+option java_multiple_files = true;
+option java_package = "it.trenical.ticketry.proto";
+
+package ticketry;
+
+
+message PurchaseTicketRequest {
+  int32 trainId = 1;
+  string serviceClass = 2;
+  string departure = 3;
+  string arrival = 4;
+  int32 ticketCount = 5;
+  string username = 6;
+  string promoId = 7;
+}
