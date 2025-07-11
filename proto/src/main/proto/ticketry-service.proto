@@ -3,6 +3,7 @@ import "google/protobuf/empty.proto";
 import "train/train-type.proto";
 import "train/service-class.proto";
 import "travel/travel-solution.proto";
+import "ticket/ticket-request.proto";
 import "common.proto";
 option java_multiple_files = true;
 option java_package = "it.trenical.ticketry.proto";
@@ -10,6 +11,7 @@ package ticketry;
 
 service TicketryService {
   rpc GetTripSolutions(TripQueryParams) returns (stream travel.TravelSolution);
+  rpc BuyTicket(PurchaseTicketRequest) returns (TicketConfirm);
 }
 
 

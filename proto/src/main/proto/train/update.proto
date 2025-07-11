@@ -1,0 +1,29 @@
+syntax="proto3";
+
+option java_multiple_files = true;
+option java_package = "it.trenical.train.proto";
+
+package train;
+
+message Update {
+  oneof content {
+    TrainUpdateTrackChange trackChange = 1;
+    TrainUpdateDelay delay = 2;
+    TrainUpdateCancelled cancelled = 3;
+  }
+}
+
+message TrainUpdateDelay {
+  int32 trainId = 1;
+  int64 delayTime = 2;
+}
+
+message TrainUpdateCancelled {
+  int32 trainId = 1;
+}
+
+message TrainUpdateTrackChange {
+  int32 trainId = 1;
+  string stationName = 2;
+  int32 track = 3;
+}

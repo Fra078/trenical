@@ -8,7 +8,7 @@ public final class GrpcInputValidator {
         throw new IllegalStateException("Utility class");
     }
 
-    public void validate(PurchaseTicketRequest request) {
+    public static void validate(PurchaseTicketRequest request) {
         if (request.getDeparture().isEmpty() || request.getArrival().isEmpty()) {
             throw Status.INVALID_ARGUMENT.withDescription("Departure and arrival are required").asRuntimeException();
         }
