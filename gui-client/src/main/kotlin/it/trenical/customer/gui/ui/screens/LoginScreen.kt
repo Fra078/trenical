@@ -4,24 +4,31 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import it.trenical.customer.gui.data.AuthManager
 import it.trenical.gui_client.generated.resources.Res
 import it.trenical.gui_client.generated.resources.trenical_logo
 import org.jetbrains.compose.resources.painterResource
 import kotlin.reflect.KMutableProperty0
 
 @Composable
-fun LoginScreen() {
-    Box(Modifier.background(Color.Blue).fillMaxSize(), contentAlignment = Alignment.Center) {
-        var isSigninUp by remember { mutableStateOf(false) }
-        Card(Modifier, elevation = 10.dp) {
+fun LoginScreen(authManager: AuthManager) {
+    Box(Modifier.background(MaterialTheme.colorScheme.secondaryContainer).fillMaxSize(), contentAlignment = Alignment.Center) {
+        var registration by remember { mutableStateOf(false) }
+        Card(modifier = Modifier, elevation = CardDefaults.cardElevation(16.dp)) {
             Column(
                 Modifier.padding(8.dp).widthIn(max = 400.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -32,10 +39,10 @@ fun LoginScreen() {
                     contentDescription = "",
                     Modifier.widthIn(max=400.dp)
                 )
-                if (isSigninUp)
-                    SignUpForm(){ isSigninUp = !isSigninUp }
+                if (registration)
+                    SignUpForm(authManager){ registration = !registration }
                 else
-                    SignInForm(){ isSigninUp = !isSigninUp }
+                    SignInForm(authManager){ registration = !registration }
             }
         }
     }
@@ -53,6 +60,7 @@ private fun Textbox(value: KMutableProperty0<String>, placeholder: String) {
 
 @Composable
 private fun ColumnScope.SignUpForm(
+    authManager: AuthManager,
     changeMode: () -> Unit
 ) {
     val firstName = remember { mutableStateOf("") }
@@ -66,13 +74,14 @@ private fun ColumnScope.SignUpForm(
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
         OutlinedButton(
-            shape = ButtonDefaults.filledTonalShape,
             modifier = Modifier.width(140.dp),
             onClick = changeMode,
             content = { Text("Accedi") }
         )
-        FilledTonalButton(
-            onClick = {},
+        Button(
+            onClick = {
+                authManager.register(username.value, password.value, firstName.value, lastName.value)
+            },
             modifier = Modifier.width(140.dp),
             content = { Text("Registrati") }
         )
@@ -82,6 +91,7 @@ private fun ColumnScope.SignUpForm(
 
 @Composable
 private fun ColumnScope.SignInForm(
+    authManager: AuthManager,
     changeMode: () -> Unit
 ) {
 
@@ -92,13 +102,14 @@ private fun ColumnScope.SignInForm(
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
         OutlinedButton(
-            shape = ButtonDefaults.filledTonalShape,
             modifier = Modifier.width(140.dp),
             onClick = changeMode,
             content = { Text("Registrati") }
         )
-        FilledTonalButton(
-            onClick = {},
+        Button(
+            onClick = {
+                authManager.login(username.value, password.value)
+            },
             modifier = Modifier.width(140.dp),
             content = { Text("Accedi") }
         )
