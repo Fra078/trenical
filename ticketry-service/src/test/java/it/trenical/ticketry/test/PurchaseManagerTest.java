@@ -1,5 +1,7 @@
 package it.trenical.ticketry.test;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.ClassSeats;
 import it.trenical.proto.train.ServiceClass;
@@ -65,7 +67,7 @@ public class PurchaseManagerTest {
     @AfterEach
     void clearDb() throws SQLException {
         try (Connection conn = dbManager.getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.execute("DROP ALL OBJECTS");
+            stmt.execute("DELETE FROM Ticket");
         List<Ticket> tickets = ticketRepository.findAll();
         System.out.println(tickets);
         }
@@ -82,8 +84,7 @@ public class PurchaseManagerTest {
 
         Thread.sleep(1000);
 
-        TicketConfirm finalConfirmation = fakeResponseObserver.confirmation.get();
-        Throwable t = fakeResponseObserver.error.get();
+        TicketConfirm finalConfirmation = fakeResponseObserver.confirmation;
         assertNotNull(finalConfirmation);
         assertFalse(finalConfirmation.getTicketIdList().isEmpty());
 
@@ -92,6 +93,21 @@ public class PurchaseManagerTest {
             assertTrue(savedTicket.isPresent(), "Il biglietto dovrebbe essere salvato nel database");
             assertEquals(Ticket.Status.CONFIRMED, savedTicket.get().getStatus(), "Lo stato del biglietto dovrebbe essere CONFIRMED");
         }
+    }
+
+    @Test
+    void buyTicketsPaymentFails() throws InterruptedException {
+        PurchaseTicketRequest request = createPurchaseRequest();
+        fakeTrainClient.setTrainToReturn(createFakeTrainResponse());
+        fakePaymentClient.paymentSuccess = false;
+        fakePromotionClient.shouldFail = false;
+        purchaseManager.buyTickets(request, fakeResponseObserver);
+
+        Thread.sleep(1000);
+        Throwable error = fakeResponseObserver.error;
+        assertNotNull(error);
+        Optional<Ticket> savedTicket = ticketRepository.findById(1, 1);
+        assertFalse(savedTicket.isPresent(), "Nessun biglietto dovrebbe essere presente nel database dopo un pagamento fallito.");
     }
 
     private PurchaseTicketRequest createPurchaseRequest() {
@@ -113,11 +129,11 @@ public class PurchaseManagerTest {
     }
 
     static class FakeResponseObserver implements StreamObserver<TicketConfirm> {
-        final AtomicReference<TicketConfirm> confirmation = new AtomicReference<>();
-        final AtomicReference<Throwable> error = new AtomicReference<>();
+        TicketConfirm confirmation = null;
+        Throwable error = null;
 
-        @Override public void onNext(TicketConfirm value) { confirmation.set(value); }
-        @Override public void onError(Throwable t) { error.set(t); }
+        @Override public void onNext(TicketConfirm value) { confirmation = value; }
+        @Override public void onError(Throwable t) { error=t; }
         @Override public void onCompleted() {  }
     }
 

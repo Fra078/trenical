@@ -31,16 +31,12 @@ public class ProcessPaymentStep implements PurchaseStep {
 
         return paymentClient.makePayment(request)
                 .thenCompose(response -> {
-                    System.out.println("Payment successful? " + response);
                     if (response.getSuccess()) {
                         return next.execute(context);
                     } else {
                         return errorHandler.execute(context);
                     }
                 })
-                .exceptionallyCompose(ex ->{
-                        System.out.println(ex);
-                        return errorHandler.execute(context);}
-                );
+                .exceptionallyCompose(ex -> errorHandler.execute(context));
     }
 }
