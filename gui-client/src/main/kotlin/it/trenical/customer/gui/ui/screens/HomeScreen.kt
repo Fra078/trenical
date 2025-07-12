@@ -1,29 +1,30 @@
 package it.trenical.customer.gui.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import it.trenical.customer.gui.data.AuthState
+import it.trenical.customer.gui.data.models.AuthState
 import it.trenical.customer.gui.data.grpc.TrenicalClient
+import it.trenical.customer.gui.data.models.QueryParams
 import it.trenical.customer.gui.ui.components.DatePickerFieldToModal
+import it.trenical.customer.gui.ui.components.DropdownSelector
 import it.trenical.customer.gui.ui.viewModels.HomeViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import it.trenical.customer.gui.ui.viewModels.TravelSearchViewModel
+import it.trenical.travel.proto.TravelSolution
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +32,7 @@ import java.util.Locale
 fun HomeScreen(authState: AuthState.Ready) {
     val trenicalClient = remember { TrenicalClient(authState.token) }
     val viewModel = remember { HomeViewModel(trenicalClient) }
+    val searchViewModel = remember { TravelSearchViewModel(trenicalClient) }
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         TopAppBar(
             title = { Text("Trenical") },
@@ -43,16 +45,16 @@ fun HomeScreen(authState: AuthState.Ready) {
         Spacer(Modifier.height(16.dp))
         Text("Benvenuto ${authState.firstName}!")
 
-        SearchPanel(viewModel)
-
+        SearchPanel(viewModel, searchViewModel::searchTravels)
+        SearchResults(searchViewModel)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchPanel(viewModel: HomeViewModel){
-    val state = viewModel.state.collectAsState().value
-    if (state != null)
+private fun SearchPanel(viewModel: HomeViewModel, searchAction: (QueryParams)->Unit) {
+    val dataSource = viewModel.dsState.collectAsState().value
+    val state = viewModel.queryState.collectAsState().value
     Card(
         modifier = Modifier
             .padding(16.dp)
@@ -73,16 +75,16 @@ private fun SearchPanel(viewModel: HomeViewModel){
 
         Column {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                MinimalDropdownMenu(
+                DropdownSelector(
                     label = "Partenza",
                     value = state.departure,
-                    options = state.stations,
+                    options = dataSource?.stations,
                     action = viewModel::setDeparture
                 )
-                MinimalDropdownMenu(
+                DropdownSelector(
                     label = "Destinazione",
                     value = state.arrival,
-                    options = state.stations,
+                    options = dataSource?.stations,
                     action = viewModel::setArrival
                 )
                 DatePickerFieldToModal(value = state.date, setValue = viewModel::setdate)
@@ -90,19 +92,19 @@ private fun SearchPanel(viewModel: HomeViewModel){
             Spacer(Modifier.height(16.dp))
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                MinimalDropdownMenu(
+                DropdownSelector(
                     label = "Tipologia",
                     value = state.trainType,
-                    options = state.trainTypes,
+                    options = dataSource?.trainTypes,
                     action = viewModel::setTrainType
                 )
-                MinimalDropdownMenu(
+                DropdownSelector(
                     label = "Classe",
                     value = state.serviceClass,
-                    options = state.serviceClasses,
+                    options = dataSource?.serviceClasses,
                     action = viewModel::setServiceClass
                 )
-                MinimalDropdownMenu(
+                DropdownSelector(
                     label = "N° viaggiatori",
                     value = state.count,
                     options = IntRange(1,5),
@@ -114,7 +116,7 @@ private fun SearchPanel(viewModel: HomeViewModel){
         Spacer(Modifier.height(16.dp))
 
         Button(
-            onClick = {},
+            onClick = { searchAction(state) },
             enabled = state.isValid,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             content = { Text("Avvia ricerca") }
@@ -124,45 +126,146 @@ private fun SearchPanel(viewModel: HomeViewModel){
     }
 }
 
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> MinimalDropdownMenu(
-    label: String,
-    value: T?,
-    options: Iterable<T>,
-    action: (T?) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = it },
+private fun SearchResults(viewModel: TravelSearchViewModel){
+    val state by viewModel.state.collectAsState()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(0.5f),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
-            readOnly = true,
-            value = value?.toString() ?: "",
-            onValueChange = {},
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors()
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+        items(
+            items = state,
+            key = { it.trainId }
+        ){
+            TravelSolutionCard(it)
+        }
+    }
+
+}
+
+@Composable
+fun TravelSolutionCard(solution: TravelSolution, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            options.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = { Text(selectionOption.toString()) },
-                    onClick = {
-                        action(selectionOption)
-                        expanded = false
-                    }
-                )
+            Text("${solution.trainName} (${solution.trainId}) - ${solution.type.name}")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = solution.routeInfo.departureTime.asTime(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = solution.routeInfo.departureStation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1.5f)
+                ) {
+                    Text(
+                        text = solution.routeInfo.distance.approx() + " km",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Distanza",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = solution.routeInfo.arrivalTime.asTime(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End
+                    )
+                    Text(
+                        text = solution.routeInfo.arrivalStation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                solution.modesList.forEach { mode ->
+                    ServicePriceRow(mode)
+                }
             }
         }
     }
 }
+
+@Composable
+private fun ServicePriceRow(mode: TravelSolution.Mode) {
+    val basePrice = mode.price
+    val promoPrice = if (mode.hasPromo()) mode.promo.finalPrice else null
+    val finalPrice = (promoPrice ?: basePrice).approx()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = mode.serviceClass.name,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (promoPrice != null){
+                Text(
+                    text = "€ ${basePrice.approx()}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textDecoration = TextDecoration.LineThrough,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.width(120.dp),
+                content = {
+                    Text(
+                        text = "€ $finalPrice",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            )
+        }
+    }
+}
+
+private fun Double.approx() = String.format("%.2f", this)
+private fun Long.asTime() =
+    DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
+        .format(Instant.ofEpochSecond(this))

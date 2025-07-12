@@ -2,6 +2,8 @@ package it.trenical.customer.gui.data.grpc
 
 import io.grpc.ManagedChannel
 import it.trenical.common.proto.Empty
+import it.trenical.customer.gui.data.mappers.toTripQueryParameters
+import it.trenical.customer.gui.data.models.QueryParams
 import it.trenical.server.gateway.proto.TrenicalGatewayGrpcKt
 import it.trenical.ticketry.proto.TripQueryParams
 import kotlinx.coroutines.flow.map
@@ -34,7 +36,7 @@ class TrenicalClient(jwt: String) {
             .sorted()
     }
 
-    fun queryTravel(){
-        client.queryTravelSolutions(TripQueryParams.newBuilder().build())
-    }
+    fun queryTravel(params: QueryParams) =
+        client.queryTravelSolutions(toTripQueryParameters(params))
+
 }

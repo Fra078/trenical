@@ -1,6 +1,7 @@
 package it.trenical.customer.gui.ui.viewModels
 
 import it.trenical.customer.gui.data.grpc.TrenicalClient
+import it.trenical.customer.gui.data.models.QueryParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -13,8 +14,10 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(private val trenicalClient: TrenicalClient) {
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val _state = MutableStateFlow<QueryState?>(null)
-    val state: StateFlow<QueryState?> = _state.asStateFlow()
+    private val _queryState = MutableStateFlow<QueryParams>(QueryParams(count = 1))
+    val queryState: StateFlow<QueryParams> = _queryState.asStateFlow()
+    private val _dsState = MutableStateFlow<QueryDataSource?>(null)
+    val dsState: StateFlow<QueryDataSource?> = _dsState.asStateFlow()
 
     init {
         scope.launch {
@@ -22,7 +25,7 @@ class HomeViewModel(private val trenicalClient: TrenicalClient) {
             val serviceClasses = async { trenicalClient.getAllServiceClasses() }
             val stations = async { trenicalClient.getAllStations() }
             awaitAll(trainTypes, serviceClasses, stations).let { (trainTypes, serviceClasses, stations) ->
-                _state.value = QueryState(
+                _dsState.value = QueryDataSource(
                     stations = stations,
                     serviceClasses = serviceClasses,
                     trainTypes = trainTypes,
@@ -30,43 +33,34 @@ class HomeViewModel(private val trenicalClient: TrenicalClient) {
             }
 
         }
-
     }
 
     fun setDeparture(station: String?) {
-        _state.getAndUpdate { it?.copy(departure = station) }
+        _queryState.getAndUpdate { it.copy(departure = station) }
     }
 
     fun setArrival(station: String?) {
-        _state.getAndUpdate { it?.copy(arrival = station) }
+        _queryState.getAndUpdate { it.copy(arrival = station) }
     }
 
     fun setCount(count: Int?) {
-        _state.getAndUpdate { it?.copy(count = count ?: 1) }
+        _queryState.getAndUpdate { it.copy(count = count ?: 1) }
     }
 
     fun setTrainType(type: String?) {
-        _state.getAndUpdate { it?.copy(trainType = type) }
+        _queryState.getAndUpdate { it.copy(trainType = type) }
     }
 
     fun setServiceClass(serviceClass: String?) {
-        _state.getAndUpdate { it?.copy(serviceClass = serviceClass) }
+        _queryState.getAndUpdate { it.copy(serviceClass = serviceClass) }
     }
 
     fun setdate(date: Long?){
-        _state.getAndUpdate { it?.copy(date = date) }}
+        _queryState.getAndUpdate { it.copy(date = date) }}
 
-    data class QueryState(
+    data class QueryDataSource(
         val stations : List<String>,
         val trainTypes: List<String>,
-        val serviceClasses: List<String>,
-        val departure: String? = null,
-        val arrival: String? = null,
-        val date: Long? = null,
-        val trainType: String? = null,
-        val serviceClass: String? = null,
-        val count: Int = 1
-    ){
-        val isValid = departure != null && arrival != null && date != null
-    }
+        val serviceClasses: List<String>
+    )
 }

@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
-import it.trenical.customer.gui.data.AuthState
+import it.trenical.customer.gui.data.models.AuthState
 import it.trenical.customer.gui.data.AuthManager
 import it.trenical.customer.gui.ui.screens.HomeScreen
 import it.trenical.customer.gui.ui.screens.LoginScreen

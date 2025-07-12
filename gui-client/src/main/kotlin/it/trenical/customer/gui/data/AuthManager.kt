@@ -2,6 +2,7 @@ package it.trenical.customer.gui.data
 
 import it.trenical.customer.gui.data.grpc.GrpcChannelProvider
 import it.trenical.customer.gui.data.grpc.LoginClient
+import it.trenical.customer.gui.data.models.AuthState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

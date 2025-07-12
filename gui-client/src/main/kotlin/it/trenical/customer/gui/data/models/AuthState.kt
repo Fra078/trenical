@@ -1,4 +1,4 @@
-package it.trenical.customer.gui.data
+package it.trenical.customer.gui.data.models
 
 sealed interface AuthState {
     data object Loading : AuthState
