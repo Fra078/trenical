@@ -39,4 +39,19 @@ class TrenicalClient(jwt: String) {
     fun queryTravel(params: QueryParams) =
         client.queryTravelSolutions(toTripQueryParameters(params))
 
+    suspend fun getLoyaltySubscription() =
+        client.getLoyaltySubscriptionInfo(Empty.getDefaultInstance())
+
+    suspend fun subscribeLoyalty() {
+        client.subscribeToLoyalty(Empty.getDefaultInstance())
+    }
+
+    suspend fun unsubscribeLoyalty() {
+        client.unsubscribeToLoyalty(Empty.getDefaultInstance())
+    }
+
+    fun listenToPromotions() =
+        client.listenToLoyaltyPromotions(Empty.getDefaultInstance())
+
+
 }
