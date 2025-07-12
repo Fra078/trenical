@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthManager {
-    private val loginClient = LoginClient(GrpcChannelProvider.get())
+    private val loginClient = LoginClient()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val _state = MutableStateFlow<AuthState>(AuthState.Login)
     val state = _state.asStateFlow()

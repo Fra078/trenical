@@ -21,7 +21,7 @@ import it.trenical.customer.gui.ui.screens.LoginScreen
 
 fun main() = singleWindowApplication(
     title = "Trenical",
-    state = WindowState(size = DpSize(800.dp, 600.dp)),
+    state = WindowState(size = DpSize(1400.dp, 800.dp)),
 ) {
     MaterialTheme {
         MainScreen()

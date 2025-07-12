@@ -3,7 +3,9 @@ import "common.proto";
 import "promotion-service.proto";
 import "ticketry-service.proto";
 import "travel/travel-solution.proto";
-
+import "train/service-class.proto";
+import "train/train-type.proto";
+import "railway-service.proto";
 option java_multiple_files = true;
 option java_package="it.trenical.server.gateway.proto";
 
@@ -14,6 +16,11 @@ service TrenicalGateway {
   rpc UnsubscribeToLoyalty(Empty) returns (Empty);
   rpc GetLoyaltySubscriptionInfo(Empty) returns (promo.GetSubscriptionInfoResponse);
   rpc ListenToLoyaltyPromotions(Empty) returns (stream promo.PromotionMessage);
+
+
+  rpc GetAllTrainTypes(Empty) returns (stream train.TrainTypeResponse);
+  rpc GetAllServiceClasses(Empty) returns (stream train.ServiceClass);
+  rpc GetAllStations(Empty) returns (stream railway.StationResponse);
 
   rpc QueryTravelSolutions(ticketry.TripQueryParams) returns (stream travel.TravelSolution);
 }

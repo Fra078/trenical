@@ -63,7 +63,7 @@ message TrainResponse {
   string name = 2;
   train.TrainTypeResponse type = 3;
   int64 departureTime = 4;
-  it.trenical.proto.railway.PathResponse path = 5;
+  railway.PathResponse path = 5;
   repeated ClassSeats seats = 6;
   map<string, int32> platformChoices = 7;
 }

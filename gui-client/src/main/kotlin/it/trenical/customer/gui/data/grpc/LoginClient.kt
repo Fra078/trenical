@@ -5,8 +5,10 @@ import it.trenical.server.gateway.proto.LoginServiceGrpcKt
 import it.trenical.user.proto.signinRequest
 import it.trenical.user.proto.signupRequest
 
-class LoginClient(channel: ManagedChannel) {
-    private val loginService = LoginServiceGrpcKt.LoginServiceCoroutineStub(channel)
+class LoginClient() {
+    private val loginService = LoginServiceGrpcKt.LoginServiceCoroutineStub(
+        GrpcChannelProvider.get()
+    )
 
     suspend fun login(username: String, password: String) =
         loginService.login(signinRequest{
