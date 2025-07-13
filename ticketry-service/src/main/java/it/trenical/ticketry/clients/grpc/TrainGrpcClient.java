@@ -3,11 +3,9 @@ package it.trenical.ticketry.clients.grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import it.trenical.proto.train.TrainId;
-import it.trenical.proto.train.TrainManagerGrpc;
-import it.trenical.proto.train.TrainQueryParameters;
-import it.trenical.proto.train.TrainResponse;
+import it.trenical.proto.train.*;
 import it.trenical.ticketry.clients.TrainClient;
+import it.trenical.train.proto.TrainUpdate;
 
 public class TrainGrpcClient implements TrainClient {
 
@@ -25,5 +23,10 @@ public class TrainGrpcClient implements TrainClient {
     @Override
     public void getTrain(int trainId, StreamObserver<TrainResponse> observer) {
         stub.getTrainById(TrainId.newBuilder().setId(trainId).build(), observer);
+    }
+
+    @Override
+    public void listenForUpdates(StreamObserver<TrainUpdate> observer) {
+        stub.listenToTrainUpdates(ListenToTrainRequest.newBuilder().build(), observer);
     }
 }

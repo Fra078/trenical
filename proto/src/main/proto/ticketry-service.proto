@@ -5,6 +5,7 @@ import "train/service-class.proto";
 import "travel/travel-solution.proto";
 import "ticket/ticket-request.proto";
 import "common.proto";
+import "train/update.proto";
 option java_multiple_files = true;
 option java_package = "it.trenical.ticketry.proto";
 package ticketry;
@@ -12,6 +13,7 @@ package ticketry;
 service TicketryService {
   rpc GetTripSolutions(TripQueryParams) returns (stream travel.TravelSolution);
   rpc BuyTicket(PurchaseTicketRequest) returns (TicketConfirm);
+  rpc ListenToMyTrains(ListenToMyTrainsRequest) returns (train.TrainUpdate);
 }
 
 
@@ -28,4 +30,8 @@ message TripQueryParams {
 message TicketConfirm {
   int32 trainId = 1;
   repeated int32 ticketId = 2;
+}
+
+message ListenToMyTrainsRequest {
+  string username = 1;
 }

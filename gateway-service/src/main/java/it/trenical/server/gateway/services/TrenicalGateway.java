@@ -5,14 +5,17 @@ import it.trenical.common.proto.Empty;
 import it.trenical.promotion.proto.*;
 import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.proto.railway.StationResponse;
+import it.trenical.proto.train.ListenToTrainRequest;
 import it.trenical.proto.train.ServiceClass;
 import it.trenical.proto.train.TrainManagerGrpc;
 import it.trenical.proto.train.TrainTypeResponse;
 import it.trenical.server.gateway.client.GrpcClientManager;
 import it.trenical.server.gateway.interceptors.JwtServerInterceptor;
 import it.trenical.server.gateway.proto.TrenicalGatewayGrpc;
+import it.trenical.ticketry.proto.ListenToMyTrainsRequest;
 import it.trenical.ticketry.proto.TicketryServiceGrpc;
 import it.trenical.ticketry.proto.TripQueryParams;
+import it.trenical.train.proto.TrainUpdate;
 import it.trenical.travel.proto.TravelSolution;
 
 public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase {
@@ -89,5 +92,19 @@ public class TrenicalGateway extends TrenicalGatewayGrpc.TrenicalGatewayImplBase
     @Override
     public void getAllStations(Empty request, StreamObserver<StationResponse> responseObserver) {
         railwayService.getAllStations(com.google.protobuf.Empty.getDefaultInstance(), responseObserver);
+    }
+
+    @Override
+    public void listenToTrainUpdates(ListenToTrainRequest request, StreamObserver<TrainUpdate> responseObserver) {
+        trainService.listenToTrainUpdates(request, responseObserver);
+    }
+
+    @Override
+    public void listenToMyTrainUpdates(Empty request, StreamObserver<TrainUpdate> responseObserver) {
+        ticketryService.listenToMyTrains(ListenToMyTrainsRequest.newBuilder()
+                .setUsername(JwtServerInterceptor.USER_ID.get())
+                .build(),
+                responseObserver
+        );
     }
 }

@@ -27,4 +27,5 @@ service TrenicalGateway {
   rpc QueryTravelSolutions(ticketry.TripQueryParams) returns (stream travel.TravelSolution);
 
   rpc ListenToTrainUpdates(train.ListenToTrainRequest) returns (stream train.TrainUpdate);
+  rpc ListenToMyTrainUpdates(Empty) returns (stream train.TrainUpdate);
 }

@@ -10,6 +10,7 @@ import it.trenical.ticketry.clients.grpc.PaymentGrpcClient;
 import it.trenical.ticketry.clients.grpc.PromotionGrpcClient;
 import it.trenical.ticketry.clients.grpc.TrainGrpcClient;
 import it.trenical.ticketry.managers.PurchaseManager;
+import it.trenical.ticketry.managers.TrainUpdateBroadcast;
 import it.trenical.ticketry.managers.TripManager;
 import it.trenical.ticketry.managers.TravelSolutionFactory;
 import it.trenical.ticketry.repositories.TicketRepository;
@@ -33,8 +34,10 @@ public class TicketryServer {
         TripManager tripManager = new TripManager(trainClient, ticketRepository, promotionClient, solutionFactory);
         PurchaseManager purchaseManager = new PurchaseManager(trainClient, ticketRepository, promotionClient, paymentClient, solutionFactory);
 
+        TrainUpdateBroadcast updateBroadcast = new TrainUpdateBroadcast(trainClient, ticketRepository);
+
         Server server = ServerBuilder.forPort(8778)
-                .addService(new TicketService(tripManager, purchaseManager))
+                .addService(new TicketService(tripManager, purchaseManager, updateBroadcast))
                 .build().start();
         System.out.println("Server started on port " + server.getPort());
         server.awaitTermination();
