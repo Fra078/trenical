@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 import it.trenical.server.database.DatabaseManager;
 import it.trenical.trainmanager.clients.grpc.RailwayGrpcClient;
 import it.trenical.trainmanager.managers.TrainManager;
+import it.trenical.trainmanager.managers.TrainUpdateBroadcast;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
@@ -33,8 +34,15 @@ public class TrainManagerServer {
                 new DefaultPlatformAssignmentStrategy()
         );
 
+        TrainUpdateBroadcast updateBroadcast = new TrainUpdateBroadcast();
+
         Server server = ServerBuilder.forPort(5051)
-                .addService(new TrainManagerService(trainManager, serviceClassRepository, typeRepository))
+                .addService(new TrainManagerService(
+                        trainManager,
+                        serviceClassRepository,
+                        typeRepository,
+                        updateBroadcast
+                        ))
                 .build()
                 .start();
 

@@ -12,7 +12,7 @@ import java.io.IOException;
 public class PaymentServer {
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        DatabaseManager db = new DatabaseManager("./db/railway-db");
+        DatabaseManager db = new DatabaseManager("./db/payment-db");
         TransactionRepository transactionRepository = new TransactionJdbcRepository(db);
 
         Server server = ServerBuilder.forPort(7887)

@@ -5,10 +5,15 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import it.trenical.proto.train.*;
+import it.trenical.train.proto.TrainUpdate;
 import it.trenical.trainmanager.managers.TrainManager;
+import it.trenical.trainmanager.managers.TrainUpdateBroadcast;
 import it.trenical.trainmanager.mapper.TrainMapper;
+import it.trenical.trainmanager.mapper.UpdateMapper;
 import it.trenical.trainmanager.models.ServiceClassModel;
 import it.trenical.trainmanager.models.TrainType;
+import it.trenical.trainmanager.observer.SingleTrainObserver;
+import it.trenical.trainmanager.observer.TrainUpdateObserver;
 import it.trenical.trainmanager.repository.ServiceClassRepository;
 import it.trenical.trainmanager.repository.TrainTypeRepository;
 
@@ -19,11 +24,18 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
     private final TrainManager trainManager;
     private final ServiceClassRepository classRepository;
     private final TrainTypeRepository typeRepository;
+    private final TrainUpdateBroadcast updateBroadcast;
 
-    public TrainManagerService(TrainManager trainManager, ServiceClassRepository classRepository, TrainTypeRepository typeRepository) {
+    public TrainManagerService(
+            TrainManager trainManager,
+            ServiceClassRepository classRepository,
+            TrainTypeRepository typeRepository,
+            TrainUpdateBroadcast updateBroadcast
+    ) {
         this.trainManager = trainManager;
         this.classRepository = classRepository;
         this.typeRepository = typeRepository;
+        this.updateBroadcast = updateBroadcast;
     }
 
     @Override
@@ -135,12 +147,53 @@ public class TrainManagerService extends TrainManagerGrpc.TrainManagerImplBase {
     @Override
     public void getAllTrains(TrainQueryParameters request, StreamObserver<TrainResponse> responseObserver) {
         try {
-            System.out.println("Received allREQ " + request.toString());
             trainManager.getAll(request, responseObserver::onNext);
             responseObserver.onCompleted();
         } catch (RuntimeException e) {
             e.printStackTrace();
             responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    public void listenToTrainUpdates(ListenToTrainRequest request, StreamObserver<TrainUpdate> responseObserver) {
+        Integer trainId = null;
+        if (request.hasTrainId())
+            trainId = request.getTrainId();
+        updateBroadcast.subscribe(new SingleTrainObserver(trainId, responseObserver::onNext));
+    }
+
+    @Override
+    public void cancelTrain(TrainId request, StreamObserver<it.trenical.common.proto.Empty> responseObserver) {
+        try {
+            trainManager.cancelTrain(request.getId());
+            responseObserver.onNext(it.trenical.common.proto.Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (StatusRuntimeException e){
+            responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    public void setTrainDelay(SetTrainDelayRequest request, StreamObserver<it.trenical.common.proto.Empty> responseObserver) {
+        try {
+            trainManager.setTrainDelay(request.getTrainId(), request.getMinutes());
+            responseObserver.onNext(it.trenical.common.proto.Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (Exception e){
+            responseObserver.onError(Status.INTERNAL.asRuntimeException());
+        }
+    }
+
+    @Override
+    public void changeTrainStationStop(ChangeTrainStationStopRequest request, StreamObserver<it.trenical.common.proto.Empty> responseObserver) {
+        try {
+            trainManager.setTrainStationPlatform(request.getTrainId(), request.getStationName(), request.getTrackNumber());
+            updateBroadcast.pushUpdate(UpdateMapper.fromRequest(request));
+            responseObserver.onNext(it.trenical.common.proto.Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         }
     }
 }

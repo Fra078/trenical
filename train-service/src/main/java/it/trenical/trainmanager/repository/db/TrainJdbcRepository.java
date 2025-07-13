@@ -48,6 +48,42 @@ public class TrainJdbcRepository implements TrainRepository {
         });
     }
 
+    @Override
+    public void setTrainDelay(int trainId, int delay) {
+        String sql = "UPDATE Train SET minutesDelay = ? WHERE id = ?";
+        db.withConnection(connection -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, delay);
+                stmt.setInt(2, trainId);
+                stmt.executeUpdate();
+            }
+        });
+    }
+
+    @Override
+    public void cancelTrain(int trainId) {
+        String sql = "UPDATE Train SET cancelled = true WHERE id = ?";
+        db.withConnection(connection -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, trainId);
+                stmt.executeUpdate();
+            }
+        });
+    }
+
+    @Override
+    public boolean updatePlatform(int trainId, String stationName, int platformNumber) {
+        String sql = "UPDATE TrainStationPlatform SET number = ? WHERE train_id = ? AND stationName = ?";
+        return db.withConnection(connection -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, platformNumber);
+                stmt.setInt(2, trainId);
+                stmt.setString(3, stationName);
+                return stmt.executeUpdate() > 0;
+            }
+        });
+    }
+
     private int insertTrain(Connection connection, TrainEntity train) throws SQLException {
         String sql = "INSERT INTO Train (name, typeName, departureTime, pathId) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -94,7 +130,7 @@ public class TrainJdbcRepository implements TrainRepository {
             Consumer<TrainEntity> consumer,
             TrainQueryParams params
     ) throws SQLException {
-        StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM Train where 1=1");
+        StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM Train where cancelled != true");
 
         if (params.type() != null)
             sqlBuilder.append(" and typeName = ?");
@@ -147,6 +183,8 @@ public class TrainJdbcRepository implements TrainRepository {
                 builder.setType(rs.getString("typeName"));
                 builder.setDepartureTime(rs.getLong("departureTime"));
                 builder.setPathId(rs.getInt("pathId"));
+                builder.setCancelled(rs.getBoolean("cancelled"));
+                builder.setMinutesDelay(rs.getInt("minutesDelay"));
             }
         }
         builder.setClassSeats(getSeats(connection, id));
@@ -207,6 +245,8 @@ public class TrainJdbcRepository implements TrainRepository {
                 typeName VARCHAR(255) NOT NULL,
                 departureTime BIGINT NOT NULL,
                 pathId INT NOT NULL,
+                cancelled BOOLEAN,
+                minutesDelay INT,
                 FOREIGN KEY (typeName) REFERENCES TrainType(name)
             );
             CREATE TABLE IF NOT EXISTS TrainSeat (

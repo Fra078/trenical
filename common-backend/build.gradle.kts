@@ -5,10 +5,6 @@ plugins {
 group = "it.trenical"
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
 
     implementation("com.h2database:h2:2.2.224")

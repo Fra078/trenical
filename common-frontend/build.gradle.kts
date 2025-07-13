@@ -5,10 +5,6 @@ plugins {
 group = "it.trenical"
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation("io.grpc:grpc-netty-shaded:1.64.0")
     implementation("io.grpc:grpc-stub:1.64.0")

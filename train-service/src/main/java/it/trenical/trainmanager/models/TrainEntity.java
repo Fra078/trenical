@@ -7,6 +7,8 @@ public record TrainEntity(Integer id,
                           String type,
                           long departureTime,
                           int pathId,
+                          boolean cancelled,
+                          int minutesDelay,
                           Map<ServiceClassModel, Integer> classSeats,
                           Map<String, Integer> platformChoice) {
 
@@ -26,9 +28,11 @@ public record TrainEntity(Integer id,
         private int pathId;
         private Map<ServiceClassModel, Integer> classSeats;
         private Map<String, Integer> platformChoice;
+        private boolean cancelled = false;
+        private int minutesDelay = 0;
 
         public TrainEntity build() {
-            return new TrainEntity(id, name, type, departureTime, pathId, classSeats, platformChoice);
+            return new TrainEntity(id, name, type, departureTime, pathId, cancelled, minutesDelay, classSeats, platformChoice);
         }
 
         private Builder() {}
@@ -39,6 +43,7 @@ public record TrainEntity(Integer id,
             setType(trainEntity.type);
             setDepartureTime(trainEntity.departureTime);
             setPathId(trainEntity.pathId);
+            setCancelled(trainEntity.cancelled);
             setClassSeats(trainEntity.classSeats);
             setPlatformChoice(trainEntity.platformChoice);
         }
@@ -58,6 +63,24 @@ public record TrainEntity(Integer id,
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        public Builder setCancelled(boolean cancelled) {
+            this.cancelled = cancelled;
+            return this;
+        }
+
+        public int getMinutesDelay() {
+            return minutesDelay;
+        }
+
+        public Builder setMinutesDelay(int minutesDelay) {
+            this.minutesDelay = minutesDelay;
             return this;
         }
 

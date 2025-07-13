@@ -1,5 +1,7 @@
 package it.trenical.trainmanager.managers;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import it.trenical.proto.railway.PathResponse;
 import it.trenical.proto.railway.StationResponse;
 import it.trenical.proto.railway.StopResponse;
@@ -114,6 +116,24 @@ public class TrainManager {
             return Map.entry(sc, entry.getValue());
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+    }
+
+    public void setTrainDelay(int trainId, int minutes) {
+        trainRepository.setTrainDelay(trainId, minutes);
+    }
+
+    public void cancelTrain(int trainId) {
+        try {
+            trainRepository.cancelTrain(trainId);
+        } catch (RuntimeException e) {
+            throw Status.INVALID_ARGUMENT.asRuntimeException();
+        }
+    }
+
+    public void setTrainStationPlatform(int trainId, String station, int platformId) {
+        boolean done = trainRepository.updatePlatform(trainId, station, platformId);
+        if (!done)
+            throw new IllegalArgumentException("Unable to update platform stop!");
     }
 
 }
