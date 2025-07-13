@@ -5,25 +5,22 @@ option java_package = "it.trenical.train.proto";
 
 package train;
 
-message Update {
+message TrainUpdate {
+  int32 trainId = 1;
   oneof content {
-    TrainUpdateTrackChange trackChange = 1;
-    TrainUpdateDelay delay = 2;
-    TrainUpdateCancelled cancelled = 3;
+    TrainUpdateTrackChange trackChange = 2;
+    TrainUpdateDelay delay = 3;
+    TrainUpdateCancelled cancelled = 4;
   }
 }
 
 message TrainUpdateDelay {
-  int32 trainId = 1;
-  int64 delayTime = 2;
+  int32 delayMinutes = 2;
 }
 
-message TrainUpdateCancelled {
-  int32 trainId = 1;
-}
+message TrainUpdateCancelled {}
 
 message TrainUpdateTrackChange {
-  int32 trainId = 1;
   string stationName = 2;
   int32 track = 3;
 }

@@ -4,10 +4,11 @@ import "common.proto";
 import "railway-service.proto";
 import "train/train-type.proto";
 import "train/service-class.proto";
+import "train/update.proto";
 option java_multiple_files = true;
 
 option java_package = "it.trenical.proto.train";
-
+package train;
 
 service TrainManager {
   rpc RegisterTrainType(RegisterTrainTypeRequest) returns (google.protobuf.Empty);
@@ -24,6 +25,11 @@ service TrainManager {
   rpc GetAllTrains(TrainQueryParameters) returns (stream TrainResponse);
   rpc GetTrainById(TrainId) returns (TrainResponse);
   rpc RemoveTrainById(TrainId) returns (google.protobuf.Empty);
+
+  rpc ListenToTrainUpdates(ListenToTrainRequest) returns (stream train.TrainUpdate);
+  rpc SetTrainDelay(SetTrainDelayRequest) returns (Empty);
+  rpc ChangeTrainStationStop(ChangeTrainStationStopRequest) returns (Empty);
+  rpc CancelTrain(TrainId) returns (Empty);
 }
 
 message RegisterTrainTypeRequest {
@@ -82,3 +88,19 @@ message TrainQueryParameters {
   optional string serviceClass = 3;
   optional DateRange dateRange= 4;
 }
+
+message ListenToTrainRequest {
+  optional int32 trainId = 1;
+}
+
+message SetTrainDelayRequest {
+  int32 trainId = 1;
+  int32 minutes = 2;
+}
+
+message ChangeTrainStationStopRequest {
+  int32 trainId = 1;
+  string stationName = 2;
+  int32 trackNumber = 3;
+}
+
