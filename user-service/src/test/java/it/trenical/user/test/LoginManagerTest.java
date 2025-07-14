@@ -4,6 +4,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import it.trenical.user.managers.LoginManager;
 import it.trenical.user.models.User;
+import it.trenical.user.password.BCryptPasswordStrategy;
 import it.trenical.user.password.HashPasswordStrategy;
 import it.trenical.user.managers.PasswordHashManager;
 import it.trenical.user.password.PlainPasswordStrategy;
@@ -125,4 +126,20 @@ class LoginManagerTest {
         });
         assertEquals(Status.UNAUTHENTICATED.getCode(), exception.getStatus().getCode());
     }
+
+    @Test
+    void bcryptPasswordHashTest() {
+        BCryptPasswordStrategy strategy = new BCryptPasswordStrategy();
+        String password = "passwordSegreta123";
+
+        String hashedPassword = strategy.hashPassword(password);
+
+        assertNotNull(hashedPassword);
+        assertNotEquals(password, hashedPassword);
+
+        assertTrue(strategy.verify(password, hashedPassword), "La verifica della password dovrebbe avere successo");
+        assertFalse(strategy.verify("passwordErrata", hashedPassword), "La verifica con una password errata dovrebbe fallire");
+    }
+
+
 }
