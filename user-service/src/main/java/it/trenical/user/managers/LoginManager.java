@@ -8,7 +8,6 @@ import it.trenical.server.jwt.JwtUtils;
 import it.trenical.user.exceptions.UserAlreadyExistsException;
 import it.trenical.user.mapper.UserMapper;
 import it.trenical.user.models.User;
-import it.trenical.user.password.PasswordHashManager;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SigninRequest;
 import it.trenical.user.proto.SignupRequest;

@@ -5,7 +5,8 @@ import io.grpc.ServerBuilder;
 import it.trenical.server.database.DatabaseManager;
 import it.trenical.user.managers.LoginManager;
 import it.trenical.user.managers.UserManager;
-import it.trenical.user.password.PasswordHashManager;
+import it.trenical.user.managers.PasswordHashManager;
+import it.trenical.user.password.BCryptPasswordStrategy;
 import it.trenical.user.password.PlainPasswordStrategy;
 import it.trenical.user.repository.UserRepository;
 import it.trenical.user.repository.jdbc.UserJdbcRepository;
@@ -29,6 +30,7 @@ public class UserServer {
 
     private static PasswordHashManager setupPasswordHashManager() {
         PlainPasswordStrategy plainStrategy = new PlainPasswordStrategy();
-        return new PasswordHashManager(plainStrategy, List.of(plainStrategy));
+        BCryptPasswordStrategy bcryptStrategy = new BCryptPasswordStrategy();
+        return new PasswordHashManager(bcryptStrategy, List.of(bcryptStrategy, plainStrategy));
     }
 }

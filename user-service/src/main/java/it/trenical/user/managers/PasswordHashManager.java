@@ -1,4 +1,6 @@
-package it.trenical.user.password;
+package it.trenical.user.managers;
+
+import it.trenical.user.password.HashPasswordStrategy;
 
 import java.util.List;
 

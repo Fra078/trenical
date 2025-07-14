@@ -5,7 +5,7 @@ import io.grpc.StatusRuntimeException;
 import it.trenical.user.managers.LoginManager;
 import it.trenical.user.models.User;
 import it.trenical.user.password.HashPasswordStrategy;
-import it.trenical.user.password.PasswordHashManager;
+import it.trenical.user.managers.PasswordHashManager;
 import it.trenical.user.password.PlainPasswordStrategy;
 import it.trenical.user.proto.LoginResponse;
 import it.trenical.user.proto.SigninRequest;
@@ -14,9 +14,7 @@ import it.trenical.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
