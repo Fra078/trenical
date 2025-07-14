@@ -16,12 +16,12 @@ public class PromotionRepositoryMap implements PromotionRepository {
 
     @Override
     public boolean save(Promotion promotion) {
-        return map.putIfAbsent(promotion.getName(), promotion) == null;
+        return map.putIfAbsent(promotion.getId(), promotion) == null;
     }
 
     @Override
     public boolean update(Promotion promotion) {
-        return map.replace(promotion.getName(), promotion)!= null;
+        return map.replace(promotion.getId(), promotion)!= null;
     }
 
     @Override
