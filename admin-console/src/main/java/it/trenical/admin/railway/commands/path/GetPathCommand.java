@@ -9,10 +9,10 @@ import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.proto.railway.StopResponse;
 
 public class GetPathCommand extends Command {
-    private final ManagedChannel channel;
-    public GetPathCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public GetPathCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("path", "Stampa una tratta ferroviaria");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class GetPathCommand extends Command {
         if (args.length != 1)
             throw new BadCommandSyntaxException(getSyntax());
         int id = Integer.parseInt(args[0]);
-        PathResponse resp = RailwayServiceGrpc.newBlockingStub(channel).getPath(
+        PathResponse resp = stub.getPath(
                 GetPathRequest.newBuilder().setId(id).build()
         );
         for (StopResponse stop : resp.getStopsList()) {

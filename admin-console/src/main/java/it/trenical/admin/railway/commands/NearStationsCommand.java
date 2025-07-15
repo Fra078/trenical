@@ -8,10 +8,10 @@ import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.proto.railway.UnlinkStationsRequest;
 
 public class NearStationsCommand extends Command {
-    private final ManagedChannel channel;
-    public NearStationsCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public NearStationsCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station list neighbours", "Mostra le distanze con le stazioni collegate");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class NearStationsCommand extends Command {
         if (args.length != 1)
             throw new BadCommandSyntaxException(getSyntax());
         String station = args[0];
-        RailwayServiceGrpc.newBlockingStub(channel).getNearStations(
+        stub.getNearStations(
                 GetNearStationsRequest.newBuilder().setName(station).build()
         ).getValueMap().forEach((stationName, distance)->{
             System.out.println(stationName+" - "+ distance);

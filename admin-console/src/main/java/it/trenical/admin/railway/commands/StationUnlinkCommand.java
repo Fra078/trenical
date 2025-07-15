@@ -7,10 +7,10 @@ import it.trenical.proto.railway.RailwayServiceGrpc;
 import it.trenical.proto.railway.UnlinkStationsRequest;
 
 public class StationUnlinkCommand extends Command {
-    private final ManagedChannel channel;
-    public StationUnlinkCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationUnlinkCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station unlink", "Rimuove un collegamento tra stazioni");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class StationUnlinkCommand extends Command {
             throw new BadCommandSyntaxException(getSyntax());
         String station1 = args[0];
         String station2 = args[1];
-        RailwayServiceGrpc.newBlockingStub(channel).unLinkStations(
+        stub.unLinkStations(
                 UnlinkStationsRequest.newBuilder()
                         .setStation1(station1)
                         .setStation2(station2)

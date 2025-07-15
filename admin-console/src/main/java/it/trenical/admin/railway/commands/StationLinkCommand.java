@@ -7,10 +7,10 @@ import it.trenical.proto.railway.LinkStationsRequest;
 import it.trenical.proto.railway.RailwayServiceGrpc;
 
 public class StationLinkCommand extends Command {
-    private final ManagedChannel channel;
-    public StationLinkCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationLinkCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station link", "Collega due stazioni");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class StationLinkCommand extends Command {
         String station1 = args[0];
         String station2 = args[1];
         double distance = Double.parseDouble(args[2]);
-        RailwayServiceGrpc.newBlockingStub(channel).linkStations(
+        stub.linkStations(
                 LinkStationsRequest.newBuilder()
                     .setStation1(station1)
                     .setStation2(station2)

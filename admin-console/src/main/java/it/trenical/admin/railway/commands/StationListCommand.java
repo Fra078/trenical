@@ -12,15 +12,14 @@ import it.trenical.proto.railway.StationResponse;
 import java.util.Iterator;
 
 public class StationListCommand extends Command {
-    private final ManagedChannel channel;
-    public StationListCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationListCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station list","Lista di tutte le stazioni esistenti");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
     protected void action(String[] args) throws BadCommandSyntaxException {
-        RailwayServiceGrpc.RailwayServiceBlockingStub stub = RailwayServiceGrpc.newBlockingStub(channel);
         Iterator<StationResponse> it = stub.getAllStations(Empty.getDefaultInstance());
         StationPrinter.printStations(it);
     }

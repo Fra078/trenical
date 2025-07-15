@@ -13,10 +13,10 @@ import it.trenical.proto.railway.StationResponse;
 import java.util.List;
 
 public class StationCreateCommand extends Command {
-    private final ManagedChannel channel;
-    public StationCreateCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationCreateCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station create","Registra una nuova stazione");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -30,7 +30,6 @@ public class StationCreateCommand extends Command {
         String name = args[0];
         String city = args[1];
         int trackCount = Integer.parseInt(args[2]);
-        RailwayServiceGrpc.RailwayServiceBlockingStub stub = RailwayServiceGrpc.newBlockingStub(channel);
         stub.registerStation(RegisterStationRequest.newBuilder().setName(name).setCity(city).setTrackCount(trackCount).build());
         System.out.println("Operazione completata!");
     }

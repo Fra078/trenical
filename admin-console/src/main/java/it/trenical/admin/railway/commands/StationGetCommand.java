@@ -13,10 +13,10 @@ import it.trenical.proto.railway.StationResponse;
 import java.util.List;
 
 public class StationGetCommand extends Command {
-    private final ManagedChannel channel;
-    public StationGetCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationGetCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station","Ottiene le informazioni riguardo una stazione");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -24,7 +24,6 @@ public class StationGetCommand extends Command {
         if (args.length != 1)
             throw new BadCommandSyntaxException(getSyntax());
         String name = args[0];
-        RailwayServiceGrpc.RailwayServiceBlockingStub stub = RailwayServiceGrpc.newBlockingStub(channel);
         StationResponse station = stub.getStation(GetStationRequest.newBuilder().setName(name).build());
         StationPrinter.printStations(List.of(station));
     }

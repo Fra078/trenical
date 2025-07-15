@@ -10,17 +10,17 @@ import java.util.Arrays;
 
 public class RegisterPathCommand extends Command {
 
-    private final ManagedChannel channel;
-    public RegisterPathCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public RegisterPathCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("path create", "Registra una tratta ferroviaria");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
     protected void action(String[] args) throws BadCommandSyntaxException {
         if (args.length < 2)
             throw new BadCommandSyntaxException(getSyntax());
-        int id = RailwayServiceGrpc.newBlockingStub(channel).registerPath(
+        int id = stub.registerPath(
                 RegisterPathRequest.newBuilder()
                         .addAllStations(Arrays.asList(args))
                         .build()

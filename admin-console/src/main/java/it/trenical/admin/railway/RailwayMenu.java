@@ -20,17 +20,17 @@ public class RailwayMenu extends Cli {
     public RailwayMenu() {
         super("Railway Manager");
         registerCommands(
-                new StationListCommand(channel),
-                new StationCreateCommand(channel),
-                new StationGetCommand(channel),
-                new StationRemoveCommand(channel),
-                new StationLinkCommand(channel),
-                new StationUnlinkCommand(channel),
-                new NearStationsCommand(channel),
-                new StationLinkCommand(channel),
-                new StationUnlinkCommand(channel),
-                new RegisterPathCommand(channel),
-                new GetPathCommand(channel),
+                new StationListCommand(railwayStub),
+                new StationCreateCommand(railwayStub),
+                new StationGetCommand(railwayStub),
+                new StationRemoveCommand(railwayStub),
+                new StationLinkCommand(railwayStub),
+                new StationUnlinkCommand(railwayStub),
+                new NearStationsCommand(railwayStub),
+                new StationLinkCommand(railwayStub),
+                new StationUnlinkCommand(railwayStub),
+                new RegisterPathCommand(railwayStub),
+                new GetPathCommand(railwayStub),
                 new PathListCommand(railwayStub)
         );
     }

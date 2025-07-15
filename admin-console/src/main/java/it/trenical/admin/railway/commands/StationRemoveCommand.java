@@ -12,10 +12,10 @@ import it.trenical.proto.railway.StationResponse;
 import java.util.List;
 
 public class StationRemoveCommand extends Command {
-    private final ManagedChannel channel;
-    public StationRemoveCommand(ManagedChannel channel) {
+    private final RailwayServiceGrpc.RailwayServiceBlockingStub stub;
+    public StationRemoveCommand(RailwayServiceGrpc.RailwayServiceBlockingStub stub) {
         super("station rm","Rimuove una stazione");
-        this.channel = channel;
+        this.stub = stub;
     }
 
     @Override
@@ -23,7 +23,6 @@ public class StationRemoveCommand extends Command {
         if (args.length != 1)
             throw new BadCommandSyntaxException(getSyntax());
         String name = args[0];
-        RailwayServiceGrpc.RailwayServiceBlockingStub stub = RailwayServiceGrpc.newBlockingStub(channel);
         stub.deleteStation(DeleteStationRequest.newBuilder().setName(name).build());
         System.out.println("Stazione " + name + " rimossa correttamente!");
     }
