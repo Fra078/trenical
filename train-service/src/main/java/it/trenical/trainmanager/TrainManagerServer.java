@@ -20,7 +20,7 @@ import java.io.IOException;
 public class TrainManagerServer {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        DatabaseManager db = new DatabaseManager("./train-db");
+        DatabaseManager db = new DatabaseManager("./db/train-db");
         TrainTypeRepository typeRepository = new TrainTypeJdbcRepository(db);
         ServiceClassRepository serviceClassRepository = new ServiceClassJdbcRepository(db);
         TrainRepository trainRepository = new TrainJdbcRepository(db);

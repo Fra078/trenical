@@ -8,6 +8,7 @@ import "travel/travel-solution.proto";
 import "train/service-class.proto";
 import "train/train-type.proto";
 import "railway-service.proto";
+import "ticket/ticket-request.proto";
 option java_multiple_files = true;
 option java_package="it.trenical.server.gateway.proto";
 
@@ -25,6 +26,7 @@ service TrenicalGateway {
   rpc GetAllStations(Empty) returns (stream railway.StationResponse);
 
   rpc QueryTravelSolutions(ticketry.TripQueryParams) returns (stream travel.TravelSolution);
+  rpc BuyTicket(ticketry.PurchaseTicketRequest) returns (ticketry.TicketConfirm);
 
   rpc ListenToTrainUpdates(train.ListenToTrainRequest) returns (stream train.TrainUpdate);
   rpc ListenToMyTrainUpdates(Empty) returns (stream train.TrainUpdate);

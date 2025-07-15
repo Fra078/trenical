@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import it.trenical.customer.gui.ui.viewModels.PurchaseViewModel
 import it.trenical.customer.gui.ui.viewModels.TravelSearchViewModel
 import it.trenical.travel.proto.TravelSolution
 import java.time.Instant
@@ -36,7 +37,7 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun SearchResults(viewModel: TravelSearchViewModel){
+fun SearchResults(viewModel: TravelSearchViewModel, purchaseViewModel: PurchaseViewModel){
     val state by viewModel.state.collectAsState()
 
     LazyColumn(
@@ -47,14 +48,26 @@ fun SearchResults(viewModel: TravelSearchViewModel){
             items = state,
             key = { it.trainId }
         ){
-            TravelSolutionCard(it)
+            TravelSolutionCard(it){ sol, mode ->
+                purchaseViewModel.requestPurchase(
+                    serviceClass = mode.serviceClass.name,
+                    trainId = it.trainId,
+                    departure = sol.routeInfo.departureStation,
+                    arrival = sol.routeInfo.arrivalStation,
+                    ticketCount = sol.ticketCount
+                )
+            }
         }
     }
 
 }
 
 @Composable
-fun TravelSolutionCard(solution: TravelSolution, modifier: Modifier = Modifier) {
+fun TravelSolutionCard(
+    solution: TravelSolution,
+    modifier: Modifier = Modifier,
+    onClick:(solution: TravelSolution, mode: TravelSolution.Mode) -> Unit
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -127,7 +140,9 @@ fun TravelSolutionCard(solution: TravelSolution, modifier: Modifier = Modifier) 
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 solution.modesList.forEach { mode ->
-                    ServicePriceRow(mode)
+                    ServicePriceRow(mode){
+                        onClick(solution, mode)
+                    }
                 }
             }
         }
@@ -135,7 +150,7 @@ fun TravelSolutionCard(solution: TravelSolution, modifier: Modifier = Modifier) 
 }
 
 @Composable
-private fun ServicePriceRow(mode: TravelSolution.Mode) {
+private fun ServicePriceRow(mode: TravelSolution.Mode, onClick: () -> Unit) {
     val basePrice = mode.price
     val promoPrice = if (mode.hasPromo()) mode.promo.finalPrice else null
     val finalPrice = (promoPrice ?: basePrice).approx()
@@ -160,7 +175,7 @@ private fun ServicePriceRow(mode: TravelSolution.Mode) {
                 Spacer(Modifier.width(8.dp))
             }
             Button(
-                onClick = {},
+                onClick = { onClick() },
                 modifier = Modifier.width(120.dp),
                 content = {
                     Text(

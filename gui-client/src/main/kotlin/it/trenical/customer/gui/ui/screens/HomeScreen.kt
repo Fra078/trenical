@@ -17,9 +17,11 @@ import it.trenical.customer.gui.data.grpc.TrenicalClient
 import it.trenical.customer.gui.data.models.AuthState
 import it.trenical.customer.gui.ui.components.FedeltaTrenoCard
 import it.trenical.customer.gui.ui.components.NotificationsCard
+import it.trenical.customer.gui.ui.components.PurchaseDialog
 import it.trenical.customer.gui.ui.components.SearchPanel
 import it.trenical.customer.gui.ui.components.SearchResults
 import it.trenical.customer.gui.ui.viewModels.HomeViewModel
+import it.trenical.customer.gui.ui.viewModels.PurchaseViewModel
 import it.trenical.customer.gui.ui.viewModels.TravelSearchViewModel
 
 
@@ -28,6 +30,7 @@ import it.trenical.customer.gui.ui.viewModels.TravelSearchViewModel
 fun HomeScreen(authState: AuthState.Ready) {
     val trenicalClient = remember { TrenicalClient(authState.token) }
     val loyaltyManager = remember { LoyaltyManager(trenicalClient) }
+    val purchaseViewModel = remember { PurchaseViewModel(trenicalClient) }
     val viewModel = remember { HomeViewModel(trenicalClient) }
     val searchViewModel = remember { TravelSearchViewModel(trenicalClient) }
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -43,7 +46,7 @@ fun HomeScreen(authState: AuthState.Ready) {
             Column(Modifier.fillMaxWidth(0.7f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(Modifier.height(16.dp))
                 SearchPanel(viewModel, searchViewModel::searchTravels)
-                SearchResults(searchViewModel)
+                SearchResults(searchViewModel, purchaseViewModel)
             }
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 FedeltaTrenoCard(loyaltyManager)
@@ -51,4 +54,5 @@ fun HomeScreen(authState: AuthState.Ready) {
             }
         }
     }
+    PurchaseDialog(purchaseViewModel)
 }

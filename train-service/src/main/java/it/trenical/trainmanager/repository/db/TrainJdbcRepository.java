@@ -130,7 +130,7 @@ public class TrainJdbcRepository implements TrainRepository {
             Consumer<TrainEntity> consumer,
             TrainQueryParams params
     ) throws SQLException {
-        StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM Train where cancelled != true");
+        StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM Train WHERE 1=1");
 
         if (params.type() != null)
             sqlBuilder.append(" and typeName = ?");

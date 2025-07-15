@@ -5,6 +5,7 @@ import it.trenical.common.proto.Empty
 import it.trenical.customer.gui.data.mappers.toTripQueryParameters
 import it.trenical.customer.gui.data.models.QueryParams
 import it.trenical.server.gateway.proto.TrenicalGatewayGrpcKt
+import it.trenical.ticketry.proto.PurchaseTicketRequest
 import it.trenical.ticketry.proto.TripQueryParams
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toCollection
@@ -53,5 +54,8 @@ class TrenicalClient(jwt: String) {
     fun listenToPromotions() =
         client.listenToLoyaltyPromotions(Empty.getDefaultInstance())
 
+    suspend fun makePurchase(request: PurchaseTicketRequest) : List<Int>{
+        return client.buyTicket(request).ticketIdList
+    }
 
 }
