@@ -75,7 +75,6 @@ public class PromotionManager {
             t: for (TravelContext context : contexts) {
                 for (Condition c: promo.getConditions())
                     if (!c.canApply(context)){
-                        System.err.println("Can't apply condition " + c + " for context " + context);
                         continue t;
                     }
                 double price = promo.getEffect().calculatePrice(context.getBasePrice(), context.getTicketCount());
